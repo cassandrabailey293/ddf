@@ -76,8 +76,8 @@ function convertToValid(key, model) {
     key.lon = Math.min(180, key.lon)
   }
   if (key.radius !== undefined) {
-    let tempRadius = Math.max(minimumBuffer, key.radius)
-    key.radius = isNaN(tempRadius) ? model.get('radius') : tempRadius
+    let tempRadius = Number(key.radius)
+    key.radius = isNaN(tempRadius) ? model.get('radius') : key.radius
   }
   if (key.lineWidth !== undefined) {
     key.lineWidth = Math.max(minimumBuffer, key.lineWidth)
@@ -107,7 +107,7 @@ module.exports = Backbone.AssociatedModel.extend({
     mapWest: undefined,
     mapSouth: undefined,
     radiusUnits: 'meters',
-    radius: 1,
+    radius: '',
     locationType: 'latlon',
     prevLocationType: 'latlon',
     lat: undefined,
@@ -682,7 +682,7 @@ module.exports = Backbone.AssociatedModel.extend({
         lat: undefined,
         lon: undefined,
         usng: undefined,
-        radius: 1,
+        radius: '',
       })
       return
     }

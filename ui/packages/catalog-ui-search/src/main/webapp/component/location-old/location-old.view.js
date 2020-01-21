@@ -205,7 +205,7 @@ module.exports = Marionette.LayoutView.extend({
       dmsLon: '',
       dmsLatDirection: Direction.North,
       dmsLonDirection: Direction.East,
-      radius: 1,
+      radius: '',
       bbox: undefined,
       polygon: undefined,
       hasKeyword: false,

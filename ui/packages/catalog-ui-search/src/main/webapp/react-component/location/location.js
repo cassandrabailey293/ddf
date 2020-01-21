@@ -117,6 +117,7 @@ const Root = styled.div`
 
 const Component = CustomElements.registerReact('location')
 let errors = false
+let errorMsg = ''
 let inValidInput = ''
 let inValidKey = ''
 let defaultCoord = ''
@@ -145,8 +146,7 @@ const LocationInput = props => {
             <Invalid>
               &nbsp;
               <span className="fa fa-exclamation-triangle" />
-              &nbsp; {inValidInput} is not an acceptable {inValidKey} value.
-              Defaulting to {defaultCoord}. &nbsp; &nbsp;
+              {errorMsg}
               <span className="fa fa-times" onClick={removeErrorBox} />
             </Invalid>
           ) : (
@@ -168,6 +168,7 @@ const ddValidators = {
   west: value => value <= 180 && value >= -180,
   south: value => value <= 90 && value >= -90,
   east: value => value <= 180 && value >= -180,
+  radius: value => value >= 0.000001,
 }
 
 let isDms = false
@@ -206,7 +207,20 @@ module.exports = ({ state, setState, options }) => (
           inValidInput = value
           inValidKey = readableNames[key]
           defaultCoord = getNegOrPosLatLon(key, value)
-          value = defaultCoord
+
+          if (!(key == 'radius')) {
+            errorMsg =
+              ' ' +
+              inValidInput +
+              ' is not an acceptable ' +
+              inValidKey +
+              ' value. Defaulting to ' +
+              defaultCoord +
+              '.  '
+            value = defaultCoord
+          } else {
+            errorMsg = ' Radius cannot be empty or less than 0.00001.  '
+          }
           setState(key, value)
           return
         }

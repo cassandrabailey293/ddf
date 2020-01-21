@@ -63,6 +63,16 @@ export function getFilterErrors(filters: any) {
         body: 'Line coordinates must be in the form [[x,y],[x,y], ... ]',
       })
     }
+    if (
+      geometry &&
+      geometry.type === 'Point' &&
+      (!filter.distance || filter.distance < 0.000001)
+    ) {
+      errors.push({
+        title: 'Invalid geometry filter',
+        body: 'Radius must be greater than 0.00001',
+      })
+    }
   }
   return errors
 }
