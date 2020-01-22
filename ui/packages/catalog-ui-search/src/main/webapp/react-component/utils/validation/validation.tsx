@@ -41,37 +41,45 @@ export function getFilterErrors(filters: any) {
   const errors: any[] = []
   for (let i = 0; i < filters.length; i++) {
     const filter = filters[i]
-    const geometry = filter.geojson && filter.geojson.geometry
-    if (
-      geometry &&
-      geometry.type === 'Polygon' &&
-      geometry.coordinates[0].length < 4
-    ) {
-      errors.push({
-        title: 'Invalid geometry filter',
-        body:
-          'Polygon coordinates must be in the form [[x,y],[x,y],[x,y],[x,y], ... ]',
-      })
+    const geometry = filter.geojson && filter.geojson.geometry && filter.geojson.properties.type
+    if(!geometry) {
+      return
     }
-    if (
-      geometry &&
-      geometry.type === 'LineString' &&
-      geometry.coordinates.length < 2
-    ) {
-      errors.push({
-        title: 'Invalid geometry filter',
-        body: 'Line coordinates must be in the form [[x,y],[x,y], ... ]',
-      })
-    }
-    if (
-      geometry &&
-      geometry.type === 'Point' &&
-      (!filter.distance || filter.distance < 0.000001)
-    ) {
-      errors.push({
-        title: 'Invalid geometry filter',
-        body: 'Radius must be greater than 0.00001',
-      })
+    switch(filter.geojson.properties.type) {
+      case 'Polygon':
+        if(geometry.coordinates[0].length < 4) {
+          errors.push({
+            title: 'Invalid geometry filter',
+            body:
+              'Polygon coordinates must be in the form [[x,y],[x,y],[x,y],[x,y], ... ]',
+          })
+        }
+        break;
+      case 'LineString':
+        if(geometry.coordinates.length < 2) {
+          errors.push({
+            title: 'Invalid geometry filter',
+            body: 'Line coordinates must be in the form [[x,y],[x,y], ... ]',
+          })
+        }
+        break;
+      case 'Point':
+        if(!filter.distance || filter.distance < 0.000001) {
+          errors.push({
+            title: 'Invalid geometry filter',
+            body: 'Radius must be greater than 0.00001',
+          })
+        }
+        break;
+      case 'BoundingBox':
+        const box = filter.geojson.properties
+        if(!box.east || !box.west || !box.north || !box.south) {
+          errors.push({
+            title: 'Invalid geometry filter',
+            body: 'Bounding Box must have North, South, East, and West values.',
+          })
+        }
+        break;
     }
   }
   return errors
