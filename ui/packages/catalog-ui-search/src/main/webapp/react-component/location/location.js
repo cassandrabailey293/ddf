@@ -162,12 +162,12 @@ const LocationInput = props => {
 }
 
 const ddValidators = {
-  lat: value => value <= 90 && value >= -90,
-  lon: value => value <= 180 && value >= -180,
-  north: value => value <= 90 && value >= -90,
-  west: value => value <= 180 && value >= -180,
-  south: value => value <= 90 && value >= -90,
-  east: value => value <= 180 && value >= -180,
+  lat: value => value <= 90 && value >= -90 && value.length != 0,
+  lon: value => value <= 180 && value >= -180 && value.length != 0,
+  north: value => value <= 90 && value >= -90 && value.length != 0,
+  west: value => value <= 180 && value >= -180 && value.length != 0,
+  south: value => value <= 90 && value >= -90 && value.length != 0,
+  east: value => value <= 180 && value >= -180 && value.length != 0,
   radius: value => value >= 0.000001,
 }
 
@@ -195,6 +195,7 @@ module.exports = ({ state, setState, options }) => (
     onDraw={options.onDraw}
     setState={setState}
     cursor={key => value => {
+      debugger
       isDms = false
       let coordValidator = ddValidators[key]
       if (coordValidator === undefined) {
@@ -203,12 +204,16 @@ module.exports = ({ state, setState, options }) => (
       }
       if (!isDms) {
         if (typeof coordValidator === 'function' && !coordValidator(value)) {
+          debugger
           errors = true
           inValidInput = value
           inValidKey = readableNames[key]
           defaultCoord = getNegOrPosLatLon(key, value)
-
-          if (!(key == 'radius')) {
+          if (key === 'radius') {
+            errorMsg = ' Radius cannot be empty or less than 0.00001.  '
+          } else if (value.length === 0) {
+            errorMsg = ' ' + inValidKey.replace(/^\w/, c => c.toUpperCase()) + ' cannot be empty.  '
+          } else {
             errorMsg =
               ' ' +
               inValidInput +
@@ -218,8 +223,6 @@ module.exports = ({ state, setState, options }) => (
               defaultCoord +
               '.  '
             value = defaultCoord
-          } else {
-            errorMsg = ' Radius cannot be empty or less than 0.00001.  '
           }
           setState(key, value)
           return
