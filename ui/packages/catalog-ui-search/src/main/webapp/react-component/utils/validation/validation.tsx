@@ -71,6 +71,9 @@ function getGeometryErrors(filter: any):Set<string> {
         if(geometry.coordinates.length < 2) {
           errors.add('Line coordinates must be in the form [[x,y],[x,y], ... ]')
         }
+        if(!filter.distance || filter.distance == 0) {
+          errors.add('Line buffer width must be greater than 0')
+        }
         break;
       case 'Point':
         if(!filter.distance || filter.distance < 0.000001) {
