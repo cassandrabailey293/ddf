@@ -38,18 +38,21 @@ export function showErrorMessages(errors: any) {
 }
 
 export function getFilterErrors(filters: any) {
-  const errors: any[] = []
+  const errors = new Set()
+  let geometryErrors = new Set<string>()
   for (let i = 0; i < filters.length; i++) {
     const filter = filters[i]
-    const geometryErrors = getGeometryErrors(filter)
-    geometryErrors.forEach(function(err) {
-      errors.push({
-        title: 'Invalid geometry filter',
-        body: err
-      })
+    getGeometryErrors(filter).forEach(function(msg) {
+      geometryErrors.add(msg)
     })
   }
-  return errors
+  geometryErrors.forEach(function(err) {
+    errors.add({
+      title: 'Invalid geometry filter',
+      body: err
+    })
+  })
+  return Array.from(errors)
 }
 
 function getGeometryErrors(filter: any):Set<string> {
@@ -73,8 +76,6 @@ function getGeometryErrors(filter: any):Set<string> {
         if(!filter.distance || filter.distance < 0.000001) {
           errors.add('Radius must be greater than 0.00001')
         }
-        errors.add('must be greater than 0.00001')
-
         break;
       case 'BoundingBox':
         const box = filter.geojson.properties
