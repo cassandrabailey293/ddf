@@ -24,7 +24,6 @@ const DistanceUtils = require('../../js/DistanceUtils.js')
 
 const converter = new usngs.Converter()
 const minimumDifference = 0.0001
-const minimumBuffer = 0.000001
 const utmUpsLocationType = 'utmUps'
 // offset used by utmUps for southern hemisphere
 const utmUpsBoundaryNorth = 84
@@ -79,12 +78,6 @@ function convertToValid(key, model) {
     let tempRadius = Number(key.radius)
     key.radius = isNaN(tempRadius) ? model.get('radius') : key.radius
   }
-  if (key.lineWidth !== undefined) {
-    key.lineWidth = Math.max(minimumBuffer, key.lineWidth)
-  }
-  if (key.polygonBufferWidth) {
-    key.polygonBufferWidth = Math.max(minimumBuffer, key.polygonBufferWidth)
-  }
 }
 
 module.exports = Backbone.AssociatedModel.extend({
@@ -122,7 +115,7 @@ module.exports = Backbone.AssociatedModel.extend({
     color: undefined,
     line: undefined,
     multiline: undefined,
-    lineWidth: 1,
+    lineWidth: '',
     lineUnits: 'meters',
     polygon: undefined,
     polygonBufferWidth: 0,
