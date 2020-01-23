@@ -163,7 +163,7 @@ class LocationInput extends React.Component {
     return Object.assign(modelJSON, {
       type,
       lineWidth: Math.max(modelJSON.lineWidth, minimumBuffer),
-      radius: Math.max(modelJSON.radius, minimumBuffer),
+      radius: modelJSON.radius,
     })
   }
   onChange = () => {

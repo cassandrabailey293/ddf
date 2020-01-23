@@ -195,7 +195,6 @@ module.exports = ({ state, setState, options }) => (
     onDraw={options.onDraw}
     setState={setState}
     cursor={key => value => {
-      debugger
       isDms = false
       let coordValidator = ddValidators[key]
       if (coordValidator === undefined) {
@@ -204,7 +203,6 @@ module.exports = ({ state, setState, options }) => (
       }
       if (!isDms) {
         if (typeof coordValidator === 'function' && !coordValidator(value)) {
-          debugger
           errors = true
           inValidInput = value
           inValidKey = readableNames[key]
