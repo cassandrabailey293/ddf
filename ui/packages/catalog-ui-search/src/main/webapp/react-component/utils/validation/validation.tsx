@@ -76,11 +76,14 @@ function getGeometryErrors(filter: any):Set<string> {
         if(!filter.distance || filter.distance < 0.000001) {
           errors.add('Radius must be greater than 0.00001')
         }
+        if(geometry.coordinates.some((coord: any) => !coord || coord.toString().length == 0)) {
+          errors.add('Coordinates must not be empty')
+        }
         break;
       case 'BoundingBox':
         const box = filter.geojson.properties
         if(!box.east || !box.west || !box.north || !box.south) {
-          errors.add('Bounding Box must have North, South, East, and West values.')
+          errors.add('Bounding Box must have North, South, East, and West values')
         }
         break;
     }
