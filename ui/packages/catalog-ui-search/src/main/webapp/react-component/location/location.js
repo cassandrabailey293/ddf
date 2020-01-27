@@ -44,6 +44,7 @@ const readableNames = {
   dmsSouth: 'latitude',
   dmsWest: 'longitude',
   dmsEast: 'longitude',
+  lineWidth: 'buffer width',
 }
 
 const validLatLon = {
@@ -169,6 +170,7 @@ const ddValidators = {
   south: value => value <= 90 && value >= -90 && value.length != 0,
   east: value => value <= 180 && value >= -180 && value.length != 0,
   radius: value => value >= 0.000001,
+  lineWidth: value => value >= 0.000001,
 }
 
 let isDms = false

@@ -68,12 +68,6 @@ class BaseLine extends React.Component {
                 value = this.convertWkt(value, 2)
               }
               this.setState({ value })
-              const fn = cursor(geometryKey)
-              try {
-                fn(JSON.parse(value))
-              } catch (e) {
-                // do nothing
-              }
             }}
             onBlur={() => this.isValidInput(this.state.value)}
             onFocus={value => {
