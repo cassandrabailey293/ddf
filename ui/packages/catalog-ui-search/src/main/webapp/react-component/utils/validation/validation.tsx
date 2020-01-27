@@ -72,12 +72,12 @@ function getGeometryErrors(filter: any):Set<string> {
           errors.add('Line coordinates must be in the form [[x,y],[x,y], ... ]')
         }
         if(!filter.distance || filter.distance == 0) {
-          errors.add('Line buffer width must be greater than 0')
+          errors.add('Line buffer width must be greater than 0.000001')
         }
         break;
       case 'Point':
         if(!filter.distance || filter.distance < 0.000001) {
-          errors.add('Radius must be greater than 0.00001')
+          errors.add('Radius must be greater than 0.000001')
         }
         if(geometry.coordinates.some((coord: any) => !coord || coord.toString().length == 0)) {
           errors.add('Coordinates must not be empty')
@@ -86,7 +86,7 @@ function getGeometryErrors(filter: any):Set<string> {
       case 'BoundingBox':
         const box = filter.geojson.properties
         if(!box.east || !box.west || !box.north || !box.south) {
-          errors.add('Bounding Box must have North, South, East, and West values')
+          errors.add('Bounding Box must have valid values')
         }
         break;
     }
