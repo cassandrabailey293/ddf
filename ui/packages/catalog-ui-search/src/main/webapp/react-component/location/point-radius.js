@@ -14,6 +14,7 @@
  **/
 const React = require('react')
 
+import { useState } from 'react'
 const { Radio, RadioItem } = require('../radio')
 const TextField = require('../text-field')
 
@@ -76,17 +77,19 @@ const usngs = require('usng.js')
 const converter = new usngs.Converter()
 
 const PointRadiusUsngMgrs = props => {
+  const [error, setError] = useState(false);
   const { usng, radius, radiusUnits, cursor } = props
-  let error = false
-  try {
-    const result = converter.USNGtoLL(usng, true)
-    error = isNaN(result.lat) || isNaN(result.lon)
-  } catch (err) {
-    error = true
+  function testValidity(usng) {
+    try {
+      const result = converter.USNGtoLL(usng, true)
+      setError(isNaN(result.lat) || isNaN(result.lon))
+    } catch (err) {
+      setError(true)
+    }
   }
   return (
     <div>
-      <TextField label="USNG / MGRS" value={usng} onChange={cursor('usng')} />
+      <TextField label="USNG / MGRS" value={usng} onChange={cursor('usng')} onBlur={() => testValidity(usng)} />
       <Units value={radiusUnits} onChange={cursor('radiusUnits')}>
         <TextField label="Radius" value={radius} onChange={cursor('radius')} />
       </Units>
