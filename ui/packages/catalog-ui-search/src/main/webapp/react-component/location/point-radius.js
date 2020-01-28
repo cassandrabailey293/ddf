@@ -45,18 +45,16 @@ const PointRadiusLatLon = props => {
   // const [radError, setRadError] = useState(false);
   const { lat, lon, radius, radiusUnits, cursor, setState } = props
   function onChangeLat(value) {
-    console.log("ON CHANGE", value)
     debugger
     let { errorMsg, defaultCoord } = getLocationInputError('lat', value)
     setLatState({ error: !locationInputValidators['lat'](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
-    if(latState.defaultValue.length != 0) {
-      value = defaultValue
+    if(defaultCoord && defaultCoord.length != 0) {
+      value = defaultCoord
     }
     setState('lat', value)
   }
   function onBlurLat(value) {
     debugger
-    console.log("ON BLUR", value)
     props.callback
     setLatState({ error: !locationInputValidators['lat'](value), errorMsg: 'Invalid latitude value', defaultValue: ''})
   }
