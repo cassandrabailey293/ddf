@@ -14,6 +14,7 @@
  **/
 
 import { InvalidSearchFormMessage } from '../../../component/announcement/CommonMessages'
+import styled from 'styled-components'
 const announcement = require('../../../component/announcement/index.jsx')
 
 export function showErrorMessages(errors: any) {
@@ -92,3 +93,76 @@ function getGeometryErrors(filter: any):Set<string> {
     }
     return errors
 }
+
+export const locationInputValidators: {[key: string]: (value: string) => boolean} = {
+  lat: (value: string) => Number(value) <= 90 && Number(value) >= -90 && value.length != 0,
+  lon: (value: string) => Number(value) <= 180 && Number(value) >= -180 && value.length != 0,
+  radius: (value: string | number) => value >= 0.000001,
+  lineWidth: (value: string | number) => value >= 0.000001,
+}
+
+export function getLocationInputError(key: string, value: string):{errorMsg:string, defaultCoord?:number} {
+  let errorMsg: string = ''
+  let defaultCoord;
+  console.log(">>>>>", locationInputValidators)
+  console.log(">>>>>", locationInputValidators[key])
+  if (key === 'radius') {
+    errorMsg = ' Radius cannot be empty or less than 0.00001.  '
+  } else if (value.length === 0) {
+    errorMsg = ' ' + readableNames[key].replace(/^\w/, c => c.toUpperCase()) + ' cannot be empty.  '
+  } else if (!locationInputValidators[key](value)) {
+    defaultCoord = getNegOrPosLatLon(key, value)
+    errorMsg = 
+      ' ' +
+      value +
+      ' is not an acceptable ' +
+      readableNames[key] +
+      ' value. Defaulting to ' +
+      defaultCoord +
+      '.  '
+  }
+  return { errorMsg, defaultCoord }
+}
+
+const readableNames: {[key: string]: string} = {
+  lat: 'latitude',
+  lon: 'longitude',
+  west: 'longitude',
+  east: 'longitude',
+  north: 'latitude',
+  south: 'latitude',
+  dmsLat: 'latitude',
+  dmsLon: 'longitude',
+  dmsNorth: 'latitude',
+  dmsSouth: 'latitude',
+  dmsWest: 'longitude',
+  dmsEast: 'longitude',
+  lineWidth: 'buffer width',
+}
+
+const validLatLon: {[key:string]: string} = {
+  lat: '90',
+  lon: '180',
+  west: '180',
+  east: '180',
+  north: '90',
+  south: '90',
+  dmsLat: '90°00\'00"',
+  dmsLon: '180°00\'00"',
+}
+
+const getNegOrPosLatLon = (key:string, value:string) => {
+  if (Number(value) < 0) {
+    return -1 * Number(validLatLon[key])
+  } else {
+    return Number(validLatLon[key])
+  }
+}
+
+export const Invalid = styled.div`
+  background-color: ${props => props.theme.negativeColor};
+  height: 100%;
+  display: block;
+  overflow: hidden;
+  color: white;
+`

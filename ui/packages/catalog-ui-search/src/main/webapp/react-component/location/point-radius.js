@@ -12,12 +12,10 @@
  * <http://www.gnu.org/licenses/lgpl.html>.
  *
  **/
-const React = require('react')
-
-import { useState } from 'react'
+import React, { useState } from 'react'
 const { Radio, RadioItem } = require('../radio')
 const TextField = require('../text-field')
-
+import { locationInputValidators, getLocationInputError } from '../utils/validation'
 const { Units, Zone, Hemisphere, MinimumSpacing } = require('./common')
 
 const {
@@ -42,17 +40,42 @@ const WarningIcon = styled.span`
 `
 
 const PointRadiusLatLon = props => {
-  const { lat, lon, radius, radiusUnits, cursor } = props
+  const [latState, setLatState] = useState({ error: false, errorMsg: '', defaultValue: '' });
+  // const [lonError, setLonError] = useState(false);
+  // const [radError, setRadError] = useState(false);
+  const { lat, lon, radius, radiusUnits, cursor, setState } = props
+  function onChangeLat(value) {
+    console.log("ON CHANGE", value)
+    debugger
+    let { errorMsg, defaultCoord } = getLocationInputError('lat', value)
+    setLatState({ error: !locationInputValidators['lat'](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
+    if(latState.defaultValue.length != 0) {
+      value = defaultValue
+    }
+    setState('lat', value)
+  }
+  function onBlurLat(value) {
+    debugger
+    console.log("ON BLUR", value)
+    props.callback
+    setLatState({ error: !locationInputValidators['lat'](value), errorMsg: 'Invalid latitude value', defaultValue: ''})
+  }
   return (
     <div>
       <TextField
         type="number"
         label="Latitude"
         value={lat}
-        onChange={cursor('lat')}
-        onBlur={props.callback}
+        onChange={(lat) => onChangeLat(lat)}
+        onBlur={() => onBlurLat(lat)}
         addon="°"
       />
+      {latState.error ? (
+        <ErrorBlock>
+          <WarningIcon className="fa fa-warning" />
+          <span>{latState.errorMsg}</span>
+        </ErrorBlock>
+      ) : null}
       <TextField
         type="number"
         label="Longitude"
@@ -82,7 +105,7 @@ const PointRadiusUsngMgrs = props => {
   function testValidity(usng) {
     try {
       const result = converter.USNGtoLL(usng, true)
-      setError(isNaN(result.lat) || isNaN(result.lon))
+      setError(Number.isNaN(result.lat) || Number.isNaN(result.lon))
     } catch (err) {
       setError(true)
     }
