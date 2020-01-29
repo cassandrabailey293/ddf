@@ -70,8 +70,8 @@ const DmsLongitude = props => {
       mask={longitudeDMSMask}
       placeholderChar="_"
       {...props}
-      onBlur={() => {
-        props.onChange(pad(props.value))
+      onBlur={(event) => {
+        props.onChange(pad(props.value), event.type)
       }}
     />
   )

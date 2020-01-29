@@ -28,7 +28,7 @@ const { Direction } = require('../../component/location-new/utils/dms-utils.js')
 const PointRadiusLatLon = props => {
   const [latlonState, setLatLonState] = useState({ error: false, errorMsg: '', defaultValue: '' });
   const [radiusError, setRadiusError] = useState(false);
-  const { lat, lon, radius, radiusUnits, cursor, setState } = props
+  const { lat, lon, radius, radiusUnits, setState } = props
   function onChangeLatLon(key, value) {
     let { errorMsg, defaultCoord } = getLocationInputError(key, value)
     setLatLonState({ error: !locationInputValidators[key](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
@@ -70,7 +70,7 @@ const PointRadiusLatLon = props => {
           <span>{latlonState.errorMsg}</span>
         </Invalid>
       ) : null}
-      <Units value={radiusUnits} onChange={cursor('radiusUnits')}>
+      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits)}>
         <TextField
           type="number"
           min="0"
@@ -95,7 +95,7 @@ const converter = new usngs.Converter()
 const PointRadiusUsngMgrs = props => {
   const [error, setError] = useState(false);
   const [radiusError, setRadiusError] = useState(false);
-  const { usng, radius, radiusUnits, cursor, setState } = props
+  const { usng, radius, radiusUnits, setState } = props
   function testValidity(usng) {
     try {
       const result = converter.USNGtoLL(usng, true)
@@ -110,14 +110,14 @@ const PointRadiusUsngMgrs = props => {
   }
   return (
     <div>
-      <TextField label="USNG / MGRS" value={usng} onChange={cursor('usng')} onBlur={() => testValidity(usng)} />
+      <TextField label="USNG / MGRS" value={usng} onChange={(usng) => setState('usng', usng)} onBlur={() => testValidity(usng)} />
       {error ? (
         <Invalid>
           <WarningIcon className="fa fa-warning" />
           <span>Invalid USNG / MGRS coords</span>
         </Invalid>
       ) : null}
-      <Units value={radiusUnits} onChange={cursor('radiusUnits')}>
+      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits)}>
         <TextField label="Radius" value={radius} onChange={(radius) => onChangeRadius(radius)} />
       </Units>
       {radiusError ? (
@@ -202,7 +202,7 @@ const PointRadiusDms = props => {
         <DirectionInput
           options={latitudeDirections}
           value={dmsLatDirection}
-          onChange={cursor('dmsLatDirection')}
+          onChange={(dmsLat) => setState('dmsLatDirection', dmsLat)}
         />
       </DmsLatitude>
       <DmsLongitude
@@ -212,7 +212,7 @@ const PointRadiusDms = props => {
         <DirectionInput
           options={longitudeDirections}
           value={dmsLonDirection}
-          onChange={cursor('dmsLonDirection')}
+          onChange={(dmsLon) => setState('dmsLonDirection', dmsLon)}
         />
       </DmsLongitude>
       {latlonState.error ? (
@@ -221,7 +221,7 @@ const PointRadiusDms = props => {
           <span>{latlonState.errorMsg}</span>
         </Invalid>
       ) : null}
-      <Units value={radiusUnits} onChange={cursor('radiusUnits')}>
+      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits)}>
         <TextField
           label="Radius"
           type="number"
