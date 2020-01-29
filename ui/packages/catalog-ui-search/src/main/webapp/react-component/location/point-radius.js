@@ -42,7 +42,6 @@ const PointRadiusLatLon = props => {
     setLatLonState({ error: !locationInputValidators[key](value), errorMsg: 'Not an acceptable value', defaultValue: ''})
   }
   function onChangeRadius(value) {
-    console.log("ON CHANGE RADIUS", value)
     setRadiusError(!locationInputValidators['radius'](value))
     setState('radius', value)
   }
@@ -94,7 +93,8 @@ const converter = new usngs.Converter()
 
 const PointRadiusUsngMgrs = props => {
   const [error, setError] = useState(false);
-  const { usng, radius, radiusUnits, cursor } = props
+  const [radiusError, setRadiusError] = useState(false);
+  const { usng, radius, radiusUnits, cursor, setState } = props
   function testValidity(usng) {
     try {
       const result = converter.USNGtoLL(usng, true)
@@ -103,16 +103,26 @@ const PointRadiusUsngMgrs = props => {
       setError(true)
     }
   }
+  function onChangeRadius(value) {
+    setRadiusError(!locationInputValidators['radius'](value))
+    setState('radius', value)
+  }
   return (
     <div>
       <TextField label="USNG / MGRS" value={usng} onChange={cursor('usng')} onBlur={() => testValidity(usng)} />
-      <Units value={radiusUnits} onChange={cursor('radiusUnits')}>
-        <TextField label="Radius" value={radius} onChange={cursor('radius')} />
-      </Units>
       {error ? (
         <Invalid>
           <WarningIcon className="fa fa-warning" />
           <span>Invalid USNG / MGRS coords</span>
+        </Invalid>
+      ) : null}
+      <Units value={radiusUnits} onChange={cursor('radiusUnits')}>
+        <TextField label="Radius" value={radius} onChange={(radius) => onChangeRadius(radius)} />
+      </Units>
+      {radiusError ? (
+        <Invalid>
+          <WarningIcon className="fa fa-warning" />
+          <span> Radius cannot be empty or less than 0.00001. </span>
         </Invalid>
       ) : null}
     </div>
