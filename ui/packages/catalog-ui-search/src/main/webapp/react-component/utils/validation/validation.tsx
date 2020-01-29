@@ -97,9 +97,16 @@ function getGeometryErrors(filter: any):Set<string> {
     return errors
 }
 
+const latValidator = (value: string) => Number(value) <= 90 && Number(value) >= -90
+const lonValidator = (value: string) => Number(value) <= 180 && Number(value) >= -180
+
 export const locationInputValidators: {[key: string]: (value: string) => boolean} = {
-  lat: (value: string) => Number(value) <= 90 && Number(value) >= -90,
-  lon: (value: string) => Number(value) <= 180 && Number(value) >= -180,
+  lat: latValidator,
+  lon: lonValidator,
+  west: lonValidator,
+  east: lonValidator,
+  north: latValidator,
+  south: latValidator,
   dmsLat: (value: string) => validateInput(value, 'dd°mm\'ss.s"') == value,
   dmsLon: (value: string) => validateInput(value, 'ddd°mm\'ss.s"') == value,
   radius: (value: string | number) => value >= 0.000001,

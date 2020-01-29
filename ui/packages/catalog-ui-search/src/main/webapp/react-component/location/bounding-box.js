@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/lgpl.html>.
  *
  **/
-const React = require('react')
+import React, { useState } from 'react'
 
 const Group = require('../group')
 const Label = require('./label')
@@ -27,11 +27,13 @@ const {
 } = require('../../component/location-new/geo-components/coordinates.js')
 const DirectionInput = require('../../component/location-new/geo-components/direction.js')
 const { Direction } = require('../../component/location-new/utils/dms-utils.js')
+import { locationInputValidators, getLocationInputError, Invalid, WarningIcon } from '../utils/validation'
 
 const minimumDifference = 0.0001
 
 const BoundingBoxLatLon = props => {
-  const { north, east, south, west, cursor } = props
+  const [latlonState, setLatLonState] = useState({ error: false, errorMsg: '', defaultValue: '' });
+  const { north, east, south, west, cursor, setState } = props
 
   const { mapEast, mapWest, mapSouth, mapNorth } = props
 
@@ -39,13 +41,25 @@ const BoundingBoxLatLon = props => {
   const eastMin = parseFloat(mapWest) + minimumDifference
   const northMin = parseFloat(mapSouth) + minimumDifference
   const southMax = parseFloat(mapNorth) - minimumDifference
-
+  function onChangeLatLon(key, value) {
+    let { errorMsg, defaultCoord } = getLocationInputError(key, value)
+    setLatLonState({ error: !locationInputValidators[key](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
+    if(defaultCoord && defaultCoord.length != 0) {
+      value = defaultCoord
+    }
+    setState(key, value)
+  }
+  function onBlurLatLon(key, value) {
+    let { errorMsg, defaultCoord } = getLocationInputError(key, value)
+    setLatLonState({ error: value.length == 0, errorMsg: errorMsg, defaultValue: defaultCoord})
+  }
   return (
     <div className="input-location">
       <TextField
         label="West"
         value={west}
-        onChange={cursor('west')}
+        onChange={(west) => onChangeLatLon('west', west)}
+        onBlur={() => onBlurLatLon('west', west)}
         type="number"
         step="any"
         min={-180}
@@ -55,7 +69,8 @@ const BoundingBoxLatLon = props => {
       <TextField
         label="South"
         value={south}
-        onChange={cursor('south')}
+        onChange={(south) => onChangeLatLon('south', south)}
+        onBlur={() => onBlurLatLon('south', south)}
         type="number"
         step="any"
         min={-90}
@@ -65,7 +80,8 @@ const BoundingBoxLatLon = props => {
       <TextField
         label="East"
         value={east}
-        onChange={cursor('east')}
+        onChange={(east) => onChangeLatLon('east', east)}
+        onBlur={() => onBlurLatLon('east', east)}
         type="number"
         step="any"
         min={eastMin || -180}
@@ -75,13 +91,20 @@ const BoundingBoxLatLon = props => {
       <TextField
         label="North"
         value={north}
-        onChange={cursor('north')}
+        onChange={(north) => onChangeLatLon('north', north)}
+        onBlur={() => onBlurLatLon('north', north)}
         type="number"
         step="any"
         min={northMin || -90}
         max={90}
         addon="°"
       />
+      {latlonState.error ? (
+        <Invalid>
+          <WarningIcon className="fa fa-warning" />
+      <span>{latlonState.errorMsg}</span>
+        </Invalid>
+      ) : null}
     </div>
   )
 }

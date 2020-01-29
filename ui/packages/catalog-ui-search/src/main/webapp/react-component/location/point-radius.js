@@ -27,7 +27,7 @@ const { Direction } = require('../../component/location-new/utils/dms-utils.js')
 
 const PointRadiusLatLon = props => {
   const [latlonState, setLatLonState] = useState({ error: false, errorMsg: '', defaultValue: '' });
-  const [radiusError, setRadiusError] = useState(false);
+  const [radiusError, setRadiusError] = useState({ error: false, errorMsg: '' });
   const { lat, lon, radius, radiusUnits, setState } = props
   function onChangeLatLon(key, value) {
     let { errorMsg, defaultCoord } = getLocationInputError(key, value)
@@ -43,7 +43,8 @@ const PointRadiusLatLon = props => {
     setLatLonState({ error: value.length == 0, errorMsg: errorMsg, defaultValue: defaultCoord})
   }
   function onChangeRadius(value) {
-    setRadiusError(!locationInputValidators['radius'](value))
+    let { errorMsg } = getLocationInputError('radius', value)
+    setRadiusError({ error: !locationInputValidators['radius'](value), errorMsg: errorMsg})
     setState('radius', value)
   }
   return (
@@ -79,10 +80,10 @@ const PointRadiusLatLon = props => {
           onChange={(radius) => onChangeRadius(radius)}
         />
       </Units>
-      {radiusError ? (
+      {radiusError.error ? (
         <Invalid>
           <WarningIcon className="fa fa-warning" />
-          <span> Radius cannot be empty or less than 0.00001. </span>
+          <span>{radiusError.errorMsg}</span>
         </Invalid>
       ) : null}
     </div>
@@ -94,7 +95,7 @@ const converter = new usngs.Converter()
 
 const PointRadiusUsngMgrs = props => {
   const [error, setError] = useState(false);
-  const [radiusError, setRadiusError] = useState(false);
+  const [radiusError, setRadiusError] = useState({ error: false, errorMsg: '' });
   const { usng, radius, radiusUnits, setState } = props
   function testValidity(usng) {
     try {
@@ -105,7 +106,8 @@ const PointRadiusUsngMgrs = props => {
     }
   }
   function onChangeRadius(value) {
-    setRadiusError(!locationInputValidators['radius'](value))
+    let { errorMsg } = getLocationInputError('radius', value)
+    setRadiusError({ error: !locationInputValidators['radius'](value), errorMsg: errorMsg})
     setState('radius', value)
   }
   return (
@@ -120,10 +122,10 @@ const PointRadiusUsngMgrs = props => {
       <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits, (errors = false))}>
         <TextField label="Radius" value={radius} onChange={(radius) => onChangeRadius(radius)} />
       </Units>
-      {radiusError ? (
+      {radiusError.error ? (
         <Invalid>
           <WarningIcon className="fa fa-warning" />
-          <span> Radius cannot be empty or less than 0.00001. </span>
+      <span>{radiusError.errorMsg}</span>
         </Invalid>
       ) : null}
     </div>
@@ -168,7 +170,7 @@ const PointRadiusUtmUps = props => {
 
 const PointRadiusDms = props => {
   const [latlonState, setLatLonState] = useState({ error: false, errorMsg: '', defaultValue: '' });
-  const [radiusError, setRadiusError] = useState(false);
+  const [radiusError, setRadiusError] = useState({ error: false, errorMsg: '' });
   const {
     dmsLat,
     dmsLon,
@@ -189,7 +191,8 @@ const PointRadiusDms = props => {
     setState(key, value)
   }
   function onChangeRadius(value) {
-    setRadiusError(!locationInputValidators['radius'](value))
+    let { errorMsg } = getLocationInputError('radius', value)
+    setRadiusError({ error: !locationInputValidators['radius'](value), errorMsg: errorMsg})
     setState('radius', value)
   }
   return (
@@ -228,10 +231,10 @@ const PointRadiusDms = props => {
           onChange={(radius) => onChangeRadius(radius)}
         />
       </Units>
-      {radiusError ? (
+      {radiusError.error ? (
         <Invalid>
           <WarningIcon className="fa fa-warning" />
-          <span> Radius cannot be empty or less than 0.00001. </span>
+      <span>{radiusError.errorMsg}</span>
         </Invalid>
       ) : null}
     </div>
