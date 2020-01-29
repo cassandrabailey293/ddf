@@ -60,7 +60,7 @@ export function getFilterErrors(filters: any) {
 
 function getGeometryErrors(filter: any):Set<string> {
     const geometry = filter.geojson && filter.geojson.geometry
-    const bufferWidth = filter.geojson.properties.buffer.width
+    const bufferWidth = filter.geojson.properties.buffer && filter.geojson.properties.buffer.width
     const errors = new Set<string>()
     if(!geometry) {
       return errors
