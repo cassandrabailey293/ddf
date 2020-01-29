@@ -27,10 +27,9 @@ const { Direction } = require('../../component/location-new/utils/dms-utils.js')
 
 const PointRadiusLatLon = props => {
   const [latlonState, setLatLonState] = useState({ error: false, errorMsg: '', defaultValue: '' });
-  // const [radError, setRadError] = useState(false);
+  const [radiusError, setRadiusError] = useState(false);
   const { lat, lon, radius, radiusUnits, cursor, setState } = props
   function onChangeLatLon(key, value) {
-    debugger
     let { errorMsg, defaultCoord } = getLocationInputError(key, value)
     setLatLonState({ error: !locationInputValidators[key](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
     if(defaultCoord && defaultCoord.length != 0) {
@@ -39,9 +38,13 @@ const PointRadiusLatLon = props => {
     setState(key, value)
   }
   function onBlurLatLon(value) {
-    debugger
     props.callback
     setLatLonState({ error: !locationInputValidators[key](value), errorMsg: 'Not an acceptable value', defaultValue: ''})
+  }
+  function onChangeRadius(value) {
+    console.log("ON CHANGE RADIUS", value)
+    setRadiusError(!locationInputValidators['radius'](value))
+    setState('radius', value)
   }
   return (
     <div>
@@ -73,9 +76,15 @@ const PointRadiusLatLon = props => {
           min="0"
           label="Radius"
           value={radius}
-          onChange={cursor('radius')}
+          onChange={(radius) => onChangeRadius(radius)}
         />
       </Units>
+      {radiusError ? (
+        <Invalid>
+          <WarningIcon className="fa fa-warning" />
+          <span> Radius cannot be empty or less than 0.00001. </span>
+        </Invalid>
+      ) : null}
     </div>
   )
 }
