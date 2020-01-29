@@ -70,7 +70,7 @@ const PointRadiusLatLon = props => {
           <span>{latlonState.errorMsg}</span>
         </Invalid>
       ) : null}
-      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits)}>
+      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits, (errors = false))}>
         <TextField
           type="number"
           min="0"
@@ -117,7 +117,7 @@ const PointRadiusUsngMgrs = props => {
           <span>Invalid USNG / MGRS coords</span>
         </Invalid>
       ) : null}
-      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits)}>
+      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits, (errors = false))}>
         <TextField label="Radius" value={radius} onChange={(radius) => onChangeRadius(radius)} />
       </Units>
       {radiusError ? (
@@ -176,7 +176,6 @@ const PointRadiusDms = props => {
     dmsLonDirection,
     radius,
     radiusUnits,
-    cursor,
     setState,
   } = props
   const latitudeDirections = [Direction.North, Direction.South]
@@ -202,7 +201,7 @@ const PointRadiusDms = props => {
         <DirectionInput
           options={latitudeDirections}
           value={dmsLatDirection}
-          onChange={(dmsLat) => setState('dmsLatDirection', dmsLat)}
+          onChange={(dmsLat) => setState('dmsLatDirection', dmsLatDirection, (errors = false))}
         />
       </DmsLatitude>
       <DmsLongitude
@@ -212,7 +211,7 @@ const PointRadiusDms = props => {
         <DirectionInput
           options={longitudeDirections}
           value={dmsLonDirection}
-          onChange={(dmsLon) => setState('dmsLonDirection', dmsLon)}
+          onChange={(dmsLon) => setState('dmsLonDirection', dmsLonDirection, (errors = false))}
         />
       </DmsLongitude>
       {latlonState.error ? (
@@ -221,7 +220,7 @@ const PointRadiusDms = props => {
           <span>{latlonState.errorMsg}</span>
         </Invalid>
       ) : null}
-      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits)}>
+      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits, (errors = false))}>
         <TextField
           label="Radius"
           type="number"
@@ -240,7 +239,7 @@ const PointRadiusDms = props => {
 }
 
 const PointRadius = props => {
-  const { cursor, locationType } = props
+  const { setState, locationType } = props
 
   const inputs = {
     latlon: PointRadiusLatLon,
@@ -253,7 +252,7 @@ const PointRadius = props => {
 
   return (
     <div>
-      <Radio value={locationType} onChange={cursor('locationType')}>
+      <Radio value={locationType} onChange={(locationType) => setState('locationType', locationType)}>
         <RadioItem value="latlon">Lat / Lon (DD)</RadioItem>
         <RadioItem value="dms">Lat / Lon (DMS)</RadioItem>
         <RadioItem value="usng">USNG / MGRS</RadioItem>

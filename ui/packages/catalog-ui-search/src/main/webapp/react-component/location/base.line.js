@@ -51,7 +51,7 @@ class BaseLine extends React.Component {
   }
   render() {
     const props = this.props
-    const { label, cursor, geometryKey, unitKey, widthKey } = props
+    const { label, cursor, geometryKey, setState, unitKey, widthKey } = props
     return (
       <React.Fragment>
         <div className="input-location">
@@ -68,22 +68,19 @@ class BaseLine extends React.Component {
                 value = this.convertWkt(value, 2)
               }
               this.setState({ value })
+              // TODO: allow model to update with invalid values
+              try {
+                setState(geometryKey, JSON.parse(value), (errors = false))
+              } catch (e) {
+                // do nothing
+              }
             }}
             onBlur={() => this.isValidInput(this.state.value)}
             onFocus={value => {
               this.setState({ isValid: true })
             }}
           />
-          <Units value={props[unitKey]} onChange={cursor(unitKey)}>
-            <TextField
-              type="number"
-              label="Buffer width"
-              value={`${props[widthKey]}`}
-              onChange={cursor(widthKey)}
-            />
-          </Units>
-        </div>
-        {this.state.isValid ? (
+                  {this.state.isValid ? (
           ''
         ) : (
           <Invalid>
@@ -93,6 +90,15 @@ class BaseLine extends React.Component {
             <span className="fa fa-times" onClick={this.removeErrorBox} />
           </Invalid>
         )}
+          <Units value={props[unitKey]} onChange={cursor(unitKey)}>
+            <TextField
+              type="number"
+              label="Buffer width"
+              value={`${props[widthKey]}`}
+              onChange={cursor(widthKey)}
+            />
+          </Units>
+        </div>
       </React.Fragment>
     )
   }

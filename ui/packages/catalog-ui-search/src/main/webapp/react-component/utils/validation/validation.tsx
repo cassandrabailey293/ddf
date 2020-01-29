@@ -60,6 +60,7 @@ export function getFilterErrors(filters: any) {
 
 function getGeometryErrors(filter: any):Set<string> {
     const geometry = filter.geojson && filter.geojson.geometry
+    const bufferWidth = filter.geojson.properties.buffer.width
     const errors = new Set<string>()
     if(!geometry) {
       return errors
@@ -74,12 +75,12 @@ function getGeometryErrors(filter: any):Set<string> {
         if(geometry.coordinates.length < 2) {
           errors.add('Line coordinates must be in the form [[x,y],[x,y], ... ]')
         }
-        if(!filter.distance || filter.distance == 0) {
+        if(!bufferWidth || bufferWidth == 0) {
           errors.add('Line buffer width must be greater than 0.000001')
         }
         break;
       case 'Point':
-        if(!filter.distance || filter.distance < 0.000001) {
+        if(!bufferWidth || bufferWidth < 0.000001) {
           errors.add('Radius must be greater than 0.000001')
         }
         if(geometry.coordinates.some((coord: any) => !coord || coord.toString().length == 0)) {
@@ -112,7 +113,7 @@ export function getLocationInputError(key: string, value: string):{errorMsg:stri
   console.log(">>>>>", locationInputValidators[key])
   if (key === 'radius') {
     errorMsg = ' Radius cannot be empty or less than 0.00001.  '
-  } else if (value.length === 0) {
+  } else if (value && value.length === 0) {
     errorMsg = ' ' + readableNames[key].replace(/^\w/, c => c.toUpperCase()) + ' cannot be empty.  '
   } else if (!locationInputValidators[key](value)) {
     defaultCoord = getValidLatLon(key, value)
