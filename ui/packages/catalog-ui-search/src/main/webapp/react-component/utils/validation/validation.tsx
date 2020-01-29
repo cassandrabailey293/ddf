@@ -99,8 +99,8 @@ function getGeometryErrors(filter: any):Set<string> {
 export const locationInputValidators: {[key: string]: (value: string) => boolean} = {
   lat: (value: string) => Number(value) <= 90 && Number(value) >= -90 && value.length != 0,
   lon: (value: string) => Number(value) <= 180 && Number(value) >= -180 && value.length != 0,
-  dmsLat: (value: string) => validateInput(value, 'dd°mm\'ss.s"'),
-  dmsLon: (value: string) => validateInput(value, 'ddd°mm\'ss.s"'),
+  dmsLat: (value: string) => validateInput(value, 'dd°mm\'ss.s"') == value,
+  dmsLon: (value: string) => validateInput(value, 'ddd°mm\'ss.s"') == value,
   radius: (value: string | number) => value >= 0.000001,
   lineWidth: (value: string | number) => value >= 0.000001,
 }
@@ -115,7 +115,8 @@ export function getLocationInputError(key: string, value: string):{errorMsg:stri
   } else if (value.length === 0) {
     errorMsg = ' ' + readableNames[key].replace(/^\w/, c => c.toUpperCase()) + ' cannot be empty.  '
   } else if (!locationInputValidators[key](value)) {
-    defaultCoord = getNegOrPosLatLon(key, value)
+    defaultCoord = getValidLatLon(key, value)
+    value = value.replace(/_/g, '0')
     errorMsg = 
       value +
       ' is not an acceptable ' +
@@ -154,12 +155,20 @@ const validLatLon: {[key:string]: string} = {
   dmsLon: '180°00\'00"',
 }
 
-const getNegOrPosLatLon = (key:string, value:string) => {
-  if (Number(value) < 0) {
-    return -1 * Number(validLatLon[key])
+const getValidLatLon = (key:string, value:string) => {
+  // TODO: change equals
+  if (key == 'dmsLat') {
+    return validateInput(value, 'dd°mm\'ss.s"')
+  } else if (key == 'dmsLon') {
+    return validateInput(value, 'ddd°mm\'ss.s"')
   } else {
-    return Number(validLatLon[key])
+    if (Number(value) < 0) {
+      return -1 * Number(validLatLon[key])
+    } else {
+      return Number(validLatLon[key])
+    }
   }
+  
 }
 
 export const Invalid = styled.div`

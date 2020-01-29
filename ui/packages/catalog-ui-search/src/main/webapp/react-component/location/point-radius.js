@@ -59,8 +59,8 @@ const PointRadiusLatLon = props => {
         type="number"
         label="Longitude"
         value={lon}
-        onChange={(lat) => onChangeLatLon('lon', lat)}
-        onBlur={() => onBlurLatLon('lon', lat)}
+        onChange={(lon) => onChangeLatLon('lon', lon)}
+        onBlur={() => onBlurLatLon('lon', lon)}
         addon="°"
       />
       {latlonState.error ? (
@@ -166,6 +166,8 @@ const PointRadiusUtmUps = props => {
 }
 
 const PointRadiusDms = props => {
+  const [latlonState, setLatLonState] = useState({ error: false, errorMsg: '', defaultValue: '' });
+  const [radiusError, setRadiusError] = useState(false);
   const {
     dmsLat,
     dmsLon,
@@ -174,13 +176,25 @@ const PointRadiusDms = props => {
     radius,
     radiusUnits,
     cursor,
+    setState,
   } = props
   const latitudeDirections = [Direction.North, Direction.South]
   const longitudeDirections = [Direction.East, Direction.West]
-
+  function onChangeLatLon(key, value) {
+    let { errorMsg, defaultCoord } = getLocationInputError(key, value)
+    setLatLonState({ error: !locationInputValidators[key](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
+    if(defaultCoord && defaultCoord.length != 0) {
+      value = defaultCoord
+    }
+    setState(key, value)
+  }
+  function onChangeRadius(value) {
+    setRadiusError(!locationInputValidators['radius'](value))
+    setState('radius', value)
+  }
   return (
     <div>
-      <DmsLatitude label="Latitude" value={dmsLat} onChange={cursor('dmsLat')}>
+      <DmsLatitude label="Latitude" value={dmsLat} onChange={(dmsLat) => onChangeLatLon('dmsLat', dmsLat)}>
         <DirectionInput
           options={latitudeDirections}
           value={dmsLatDirection}
@@ -190,7 +204,7 @@ const PointRadiusDms = props => {
       <DmsLongitude
         label="Longitude"
         value={dmsLon}
-        onChange={cursor('dmsLon')}
+        onChange={(dmsLon) => onChangeLatLon('dmsLon', dmsLon)}
       >
         <DirectionInput
           options={longitudeDirections}
@@ -198,14 +212,26 @@ const PointRadiusDms = props => {
           onChange={cursor('dmsLonDirection')}
         />
       </DmsLongitude>
+      {latlonState.error ? (
+        <Invalid>
+          <WarningIcon className="fa fa-warning" />
+          <span>{latlonState.errorMsg}</span>
+        </Invalid>
+      ) : null}
       <Units value={radiusUnits} onChange={cursor('radiusUnits')}>
         <TextField
           label="Radius"
           type="number"
           value={radius}
-          onChange={cursor('radius')}
+          onChange={(radius) => onChangeRadius(radius)}
         />
       </Units>
+      {radiusError ? (
+        <Invalid>
+          <WarningIcon className="fa fa-warning" />
+          <span> Radius cannot be empty or less than 0.00001. </span>
+        </Invalid>
+      ) : null}
     </div>
   )
 }
