@@ -99,6 +99,8 @@ function getGeometryErrors(filter: any):Set<string> {
 
 const latValidator = (value: string) => Number(value) <= 90 && Number(value) >= -90
 const lonValidator = (value: string) => Number(value) <= 180 && Number(value) >= -180
+const dmsLatValidator = (value: string) => validateInput(value, 'dd°mm\'ss.s"') == value
+const dmsLonValidator = (value: string) => validateInput(value, 'ddd°mm\'ss.s"') == value
 
 export const locationInputValidators: {[key: string]: (value: string) => boolean} = {
   lat: latValidator,
@@ -107,8 +109,12 @@ export const locationInputValidators: {[key: string]: (value: string) => boolean
   east: lonValidator,
   north: latValidator,
   south: latValidator,
-  dmsLat: (value: string) => validateInput(value, 'dd°mm\'ss.s"') == value,
-  dmsLon: (value: string) => validateInput(value, 'ddd°mm\'ss.s"') == value,
+  dmsLat: dmsLatValidator,
+  dmsLon: dmsLonValidator,
+  dmsNorth: dmsLatValidator,
+  dmsSouth: dmsLatValidator,
+  dmsWest: dmsLonValidator,
+  dmsEast: dmsLonValidator,
   radius: (value: string | number) => value >= 0.000001,
   lineWidth: (value: string | number) => value >= 0.000001,
 }
@@ -164,9 +170,9 @@ const validLatLon: {[key:string]: string} = {
 
 const getValidLatLon = (key:string, value:string) => {
   // TODO: change equals
-  if (key == 'dmsLat') {
+  if (key == 'dmsLat' || key == 'dmsNorth' || key == 'dmsSouth') {
     return validateInput(value, 'dd°mm\'ss.s"')
-  } else if (key == 'dmsLon') {
+  } else if (key == 'dmsLon' || key == 'dmsEast' || key == 'dmsWest') {
     return validateInput(value, 'ddd°mm\'ss.s"')
   } else {
     if (Number(value) < 0) {

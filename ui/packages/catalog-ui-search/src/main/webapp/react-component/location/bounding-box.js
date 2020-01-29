@@ -33,7 +33,7 @@ const minimumDifference = 0.0001
 
 const BoundingBoxLatLon = props => {
   const [latlonState, setLatLonState] = useState({ error: false, errorMsg: '', defaultValue: '' });
-  const { north, east, south, west, cursor, setState } = props
+  const { north, east, south, west, setState } = props
 
   const { mapEast, mapWest, mapSouth, mapNorth } = props
 
@@ -205,6 +205,7 @@ const BoundingBoxUtmUps = props => {
 }
 
 const BoundingBoxDms = props => {
+  const [latlonState, setLatLonState] = useState({ error: false, errorMsg: '', defaultValue: '' });
   const {
     dmsSouth,
     dmsNorth,
@@ -217,41 +218,56 @@ const BoundingBoxDms = props => {
     dmsEastDirection,
 
     cursor,
+    setState
   } = props
 
   const latitudeDirections = [Direction.North, Direction.South]
   const longitudeDirections = [Direction.East, Direction.West]
 
+  function onChangeLatLon(key, value, type) {
+    let { errorMsg, defaultCoord } = getLocationInputError(key, value)
+    setLatLonState({ error: type == 'blur' ? value.length == 0 : !locationInputValidators[key](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
+    if(defaultCoord && defaultCoord.length != 0) {
+      value = defaultCoord
+    }
+    setState(key, value)
+  }
   return (
     <div className="input-location">
-      <DmsLongitude label="West" value={dmsWest} onChange={cursor('dmsWest')}>
+      <DmsLongitude label="West" value={dmsWest} onChange={(dmsWest, type) => onChangeLatLon('dmsWest', dmsWest, type)}>
         <DirectionInput
           options={longitudeDirections}
           value={dmsWestDirection}
           onChange={cursor('dmsWestDirection')}
         />
       </DmsLongitude>
-      <DmsLatitude label="South" value={dmsSouth} onChange={cursor('dmsSouth')}>
+      <DmsLatitude label="South" value={dmsSouth} onChange={(dmsSouth, type) => onChangeLatLon('dmsSouth', dmsSouth, type)}>
         <DirectionInput
           options={latitudeDirections}
           value={dmsSouthDirection}
           onChange={cursor('dmsSouthDirection')}
         />
       </DmsLatitude>
-      <DmsLongitude label="East" value={dmsEast} onChange={cursor('dmsEast')}>
+      <DmsLongitude label="East" value={dmsEast} onChange={(dmsEast, type) => onChangeLatLon('dmsEast', dmsEast, type)}>
         <DirectionInput
           options={longitudeDirections}
           value={dmsEastDirection}
           onChange={cursor('dmsEastDirection')}
         />
       </DmsLongitude>
-      <DmsLatitude label="North" value={dmsNorth} onChange={cursor('dmsNorth')}>
+      <DmsLatitude label="North" value={dmsNorth} onChange={(dmsNorth, type) => onChangeLatLon('dmsNorth', dmsNorth, type)}>
         <DirectionInput
           options={latitudeDirections}
           value={dmsNorthDirection}
           onChange={cursor('dmsNorthDirection')}
         />
       </DmsLatitude>
+      {latlonState.error ? (
+        <Invalid>
+          <WarningIcon className="fa fa-warning" />
+      <span>{latlonState.errorMsg}</span>
+        </Invalid>
+      ) : null}
     </div>
   )
 }

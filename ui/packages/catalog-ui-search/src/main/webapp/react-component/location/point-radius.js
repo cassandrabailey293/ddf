@@ -204,7 +204,7 @@ const PointRadiusDms = props => {
         <DirectionInput
           options={latitudeDirections}
           value={dmsLatDirection}
-          onChange={(dmsLat) => setState('dmsLatDirection', dmsLatDirection, (errors = false))}
+          onChange={(dmsLatDirection) => setState('dmsLatDirection', dmsLatDirection, (errors = false))}
         />
       </DmsLatitude>
       <DmsLongitude
@@ -214,7 +214,7 @@ const PointRadiusDms = props => {
         <DirectionInput
           options={longitudeDirections}
           value={dmsLonDirection}
-          onChange={(dmsLon) => setState('dmsLonDirection', dmsLonDirection, (errors = false))}
+          onChange={(dmsLonDirection) => setState('dmsLonDirection', dmsLonDirection, (errors = false))}
         />
       </DmsLongitude>
       {latlonState.error ? (
