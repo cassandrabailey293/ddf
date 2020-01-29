@@ -39,7 +39,8 @@ const PointRadiusLatLon = props => {
   }
   function onBlurLatLon(key, value) {
     props.callback
-    setLatLonState({ error: value.length == 0, errorMsg: 'Coordinates cannot be empty', defaultValue: ''})
+    let { errorMsg, defaultCoord } = getLocationInputError(key, value)
+    setLatLonState({ error: value.length == 0, errorMsg: errorMsg, defaultValue: defaultCoord})
   }
   function onChangeRadius(value) {
     setRadiusError(!locationInputValidators['radius'](value))
@@ -180,9 +181,9 @@ const PointRadiusDms = props => {
   } = props
   const latitudeDirections = [Direction.North, Direction.South]
   const longitudeDirections = [Direction.East, Direction.West]
-  function onChangeLatLon(key, value) {
+  function onChangeLatLon(key, value, type) {
     let { errorMsg, defaultCoord } = getLocationInputError(key, value)
-    setLatLonState({ error: !locationInputValidators[key](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
+    setLatLonState({ error: type == 'blur' ? value.length == 0 : !locationInputValidators[key](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
     if(defaultCoord && defaultCoord.length != 0) {
       value = defaultCoord
     }
@@ -194,7 +195,10 @@ const PointRadiusDms = props => {
   }
   return (
     <div>
-      <DmsLatitude label="Latitude" value={dmsLat} onChange={(dmsLat) => onChangeLatLon('dmsLat', dmsLat)}>
+      <DmsLatitude 
+        label="Latitude" 
+        value={dmsLat} 
+        onChange={(dmsLat, type) => onChangeLatLon('dmsLat', dmsLat, type)}>
         <DirectionInput
           options={latitudeDirections}
           value={dmsLatDirection}
@@ -204,8 +208,7 @@ const PointRadiusDms = props => {
       <DmsLongitude
         label="Longitude"
         value={dmsLon}
-        onChange={(dmsLon) => onChangeLatLon('dmsLon', dmsLon)}
-      >
+        onChange={(dmsLon, type) => onChangeLatLon('dmsLon', dmsLon, type)}>
         <DirectionInput
           options={longitudeDirections}
           value={dmsLonDirection}

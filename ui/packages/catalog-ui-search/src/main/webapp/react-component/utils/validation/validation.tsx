@@ -116,9 +116,8 @@ export function getLocationInputError(key: string, value: string):{errorMsg:stri
     errorMsg = ' ' + readableNames[key].replace(/^\w/, c => c.toUpperCase()) + ' cannot be empty.  '
   } else if (!locationInputValidators[key](value)) {
     defaultCoord = getValidLatLon(key, value)
-    value = value.replace(/_/g, '0')
     errorMsg = 
-      value +
+      value.replace(/_/g, '0') +
       ' is not an acceptable ' +
       readableNames[key] +
       ' value. Defaulting to ' +
