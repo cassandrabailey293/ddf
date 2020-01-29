@@ -16,7 +16,9 @@
 import { InvalidSearchFormMessage } from '../../../component/announcement/CommonMessages'
 import styled from 'styled-components'
 const announcement = require('../../../component/announcement/index.jsx')
-
+const {
+  validateInput,
+} = require('../../../component/location-new/utils/dms-utils')
 export function showErrorMessages(errors: any) {
   if (errors.length === 0) {
     return
@@ -97,6 +99,8 @@ function getGeometryErrors(filter: any):Set<string> {
 export const locationInputValidators: {[key: string]: (value: string) => boolean} = {
   lat: (value: string) => Number(value) <= 90 && Number(value) >= -90 && value.length != 0,
   lon: (value: string) => Number(value) <= 180 && Number(value) >= -180 && value.length != 0,
+  dmsLat: (value: string) => validateInput(value, 'dd°mm\'ss.s"'),
+  dmsLon: (value: string) => validateInput(value, 'ddd°mm\'ss.s"'),
   radius: (value: string | number) => value >= 0.000001,
   lineWidth: (value: string | number) => value >= 0.000001,
 }
