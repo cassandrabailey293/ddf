@@ -217,8 +217,7 @@ const BoundingBoxDms = props => {
     dmsWestDirection,
     dmsEastDirection,
 
-    cursor,
-    setState
+    setState,
   } = props
 
   const latitudeDirections = [Direction.North, Direction.South]
@@ -238,28 +237,28 @@ const BoundingBoxDms = props => {
         <DirectionInput
           options={longitudeDirections}
           value={dmsWestDirection}
-          onChange={cursor('dmsWestDirection')}
+          onChange={(dmsWestDirection) => setState('dmsWestDirection', dmsWestDirection)}
         />
       </DmsLongitude>
       <DmsLatitude label="South" value={dmsSouth} onChange={(dmsSouth, type) => onChangeLatLon('dmsSouth', dmsSouth, type)}>
         <DirectionInput
           options={latitudeDirections}
           value={dmsSouthDirection}
-          onChange={cursor('dmsSouthDirection')}
+          onChange={(dmsSouthDirection) => setState('dmsSouthDirection', dmsSouthDirection)}
         />
       </DmsLatitude>
       <DmsLongitude label="East" value={dmsEast} onChange={(dmsEast, type) => onChangeLatLon('dmsEast', dmsEast, type)}>
         <DirectionInput
           options={longitudeDirections}
           value={dmsEastDirection}
-          onChange={cursor('dmsEastDirection')}
+          onChange={(dmsEastDirection) => setState('dmsEastDirection', dmsEastDirection)}
         />
       </DmsLongitude>
       <DmsLatitude label="North" value={dmsNorth} onChange={(dmsNorth, type) => onChangeLatLon('dmsNorth', dmsNorth, type)}>
         <DirectionInput
           options={latitudeDirections}
           value={dmsNorthDirection}
-          onChange={cursor('dmsNorthDirection')}
+          onChange={(dmsNorthDirection) => setState('dmsNorthDirection', dmsNorthDirection)}
         />
       </DmsLatitude>
       {latlonState.error ? (

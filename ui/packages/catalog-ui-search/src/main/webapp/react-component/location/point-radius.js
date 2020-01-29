@@ -71,7 +71,7 @@ const PointRadiusLatLon = props => {
           <span>{latlonState.errorMsg}</span>
         </Invalid>
       ) : null}
-      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits, (errors = false))}>
+      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits)}>
         <TextField
           type="number"
           min="0"
@@ -119,7 +119,7 @@ const PointRadiusUsngMgrs = props => {
           <span>Invalid USNG / MGRS coords</span>
         </Invalid>
       ) : null}
-      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits, (errors = false))}>
+      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits)}>
         <TextField label="Radius" value={radius} onChange={(radius) => onChangeRadius(radius)} />
       </Units>
       {radiusError.error ? (
@@ -204,7 +204,7 @@ const PointRadiusDms = props => {
         <DirectionInput
           options={latitudeDirections}
           value={dmsLatDirection}
-          onChange={(dmsLatDirection) => setState('dmsLatDirection', dmsLatDirection, (errors = false))}
+          onChange={(dmsLatDirection) => setState('dmsLatDirection', dmsLatDirection)}
         />
       </DmsLatitude>
       <DmsLongitude
@@ -214,7 +214,7 @@ const PointRadiusDms = props => {
         <DirectionInput
           options={longitudeDirections}
           value={dmsLonDirection}
-          onChange={(dmsLonDirection) => setState('dmsLonDirection', dmsLonDirection, (errors = false))}
+          onChange={(dmsLonDirection) => setState('dmsLonDirection', dmsLonDirection)}
         />
       </DmsLongitude>
       {latlonState.error ? (
@@ -223,7 +223,7 @@ const PointRadiusDms = props => {
           <span>{latlonState.errorMsg}</span>
         </Invalid>
       ) : null}
-      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits, (errors = false))}>
+      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits)}>
         <TextField
           label="Radius"
           type="number"
