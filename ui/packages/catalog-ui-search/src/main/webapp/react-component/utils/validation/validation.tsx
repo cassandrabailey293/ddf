@@ -113,7 +113,7 @@ export function getLocationInputError(key: string, value: string):{errorMsg:stri
   console.log(">>>>>", locationInputValidators[key])
   if (key === 'radius') {
     errorMsg = ' Radius cannot be empty or less than 0.00001.  '
-  } else if (value && value.length === 0) {
+  } else if (value !== undefined && value.length === 0) {
     errorMsg = ' ' + readableNames[key].replace(/^\w/, c => c.toUpperCase()) + ' cannot be empty.  '
   } else if (!locationInputValidators[key](value)) {
     defaultCoord = getValidLatLon(key, value)
