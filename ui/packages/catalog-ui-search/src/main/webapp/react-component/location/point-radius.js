@@ -15,7 +15,7 @@
 import React, { useState } from 'react'
 const { Radio, RadioItem } = require('../radio')
 const TextField = require('../text-field')
-import { locationInputValidators, getLocationInputError } from '../utils/validation'
+import { locationInputValidators, getLocationInputError, Invalid, WarningIcon } from '../utils/validation'
 const { Units, Zone, Hemisphere, MinimumSpacing } = require('./common')
 
 const {
@@ -24,20 +24,6 @@ const {
 } = require('../../component/location-new/geo-components/coordinates.js')
 const DirectionInput = require('../../component/location-new/geo-components/direction.js')
 const { Direction } = require('../../component/location-new/utils/dms-utils.js')
-import styled from 'styled-components'
-
-const ErrorBlock = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  background: ${({ theme }) => theme.negativeColor};
-`
-
-const WarningIcon = styled.span`
-  padding: ${({ theme }) => theme.minimumSpacing};
-`
 
 const PointRadiusLatLon = props => {
   const [latlonState, setLatLonState] = useState({ error: false, errorMsg: '', defaultValue: '' });
@@ -76,10 +62,10 @@ const PointRadiusLatLon = props => {
         addon="°"
       />
       {latlonState.error ? (
-        <ErrorBlock>
+        <Invalid>
           <WarningIcon className="fa fa-warning" />
           <span>{latlonState.errorMsg}</span>
-        </ErrorBlock>
+        </Invalid>
       ) : null}
       <Units value={radiusUnits} onChange={cursor('radiusUnits')}>
         <TextField
@@ -115,10 +101,10 @@ const PointRadiusUsngMgrs = props => {
         <TextField label="Radius" value={radius} onChange={cursor('radius')} />
       </Units>
       {error ? (
-        <ErrorBlock>
+        <Invalid>
           <WarningIcon className="fa fa-warning" />
           <span>Invalid USNG / MGRS coords</span>
-        </ErrorBlock>
+        </Invalid>
       ) : null}
     </div>
   )

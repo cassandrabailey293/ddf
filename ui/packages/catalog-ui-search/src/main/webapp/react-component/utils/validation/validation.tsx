@@ -113,7 +113,6 @@ export function getLocationInputError(key: string, value: string):{errorMsg:stri
   } else if (!locationInputValidators[key](value)) {
     defaultCoord = getNegOrPosLatLon(key, value)
     errorMsg = 
-      ' ' +
       value +
       ' is not an acceptable ' +
       readableNames[key] +
@@ -165,4 +164,8 @@ export const Invalid = styled.div`
   display: block;
   overflow: hidden;
   color: white;
+`
+
+export const WarningIcon = styled.span`
+  padding: ${({ theme }) => theme.minimumSpacing};
 `
