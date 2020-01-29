@@ -40,23 +40,22 @@ const WarningIcon = styled.span`
 `
 
 const PointRadiusLatLon = props => {
-  const [latState, setLatState] = useState({ error: false, errorMsg: '', defaultValue: '' });
-  // const [lonError, setLonError] = useState(false);
+  const [latlonState, setLatLonState] = useState({ error: false, errorMsg: '', defaultValue: '' });
   // const [radError, setRadError] = useState(false);
   const { lat, lon, radius, radiusUnits, cursor, setState } = props
-  function onChangeLat(value) {
+  function onChangeLatLon(key, value) {
     debugger
-    let { errorMsg, defaultCoord } = getLocationInputError('lat', value)
-    setLatState({ error: !locationInputValidators['lat'](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
+    let { errorMsg, defaultCoord } = getLocationInputError(key, value)
+    setLatLonState({ error: !locationInputValidators[key](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
     if(defaultCoord && defaultCoord.length != 0) {
       value = defaultCoord
     }
-    setState('lat', value)
+    setState(key, value)
   }
-  function onBlurLat(value) {
+  function onBlurLatLon(value) {
     debugger
     props.callback
-    setLatState({ error: !locationInputValidators['lat'](value), errorMsg: 'Invalid latitude value', defaultValue: ''})
+    setLatLonState({ error: !locationInputValidators[key](value), errorMsg: 'Not an acceptable value', defaultValue: ''})
   }
   return (
     <div>
@@ -64,23 +63,24 @@ const PointRadiusLatLon = props => {
         type="number"
         label="Latitude"
         value={lat}
-        onChange={(lat) => onChangeLat(lat)}
-        onBlur={() => onBlurLat(lat)}
+        onChange={(lat) => onChangeLatLon('lat', lat)}
+        onBlur={() => onBlurLatLon('lat', lat)}
         addon="°"
       />
-      {latState.error ? (
-        <ErrorBlock>
-          <WarningIcon className="fa fa-warning" />
-          <span>{latState.errorMsg}</span>
-        </ErrorBlock>
-      ) : null}
       <TextField
         type="number"
         label="Longitude"
         value={lon}
-        onChange={cursor('lon')}
+        onChange={(lat) => onChangeLatLon('lon', lat)}
+        onBlur={() => onBlurLatLon('lon', lat)}
         addon="°"
       />
+      {latlonState.error ? (
+        <ErrorBlock>
+          <WarningIcon className="fa fa-warning" />
+          <span>{latlonState.errorMsg}</span>
+        </ErrorBlock>
+      ) : null}
       <Units value={radiusUnits} onChange={cursor('radiusUnits')}>
         <TextField
           type="number"
