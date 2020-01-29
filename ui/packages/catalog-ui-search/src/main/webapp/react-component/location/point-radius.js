@@ -39,7 +39,7 @@ const PointRadiusLatLon = props => {
   }
   function onBlurLatLon(key, value) {
     props.callback
-    setLatLonState({ error: !locationInputValidators[key](value), errorMsg: 'Not an acceptable value', defaultValue: ''})
+    setLatLonState({ error: value.length == 0, errorMsg: 'Coordinates cannot be empty', defaultValue: ''})
   }
   function onChangeRadius(value) {
     setRadiusError(!locationInputValidators['radius'](value))
