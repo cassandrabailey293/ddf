@@ -109,22 +109,42 @@ const BoundingBoxLatLon = props => {
   )
 }
 
+const usngs = require('usng.js')
+const converter = new usngs.Converter()
+
 const BoundingBoxUsngMgrs = props => {
-  const { usngbbUpperLeft, usngbbLowerRight, cursor } = props
+  const [error, setError] = useState(false);
+  const { usngbbUpperLeft, usngbbLowerRight, setState } = props
+  function testValidity(usng) {
+    try {
+      const result = converter.USNGtoLL(usng, true)
+      setError(Number.isNaN(result.lat) || Number.isNaN(result.lon))
+    } catch (err) {
+      setError(true)
+    }
+  }
   return (
     <div className="input-location">
       <TextField
         label="Upper Left"
         style={{ minWidth: 200 }}
         value={usngbbUpperLeft}
-        onChange={cursor('usngbbUpperLeft')}
+        onChange={(usngbbUpperLeft) => setState('usngbbUpperLeft', usngbbUpperLeft)}
+        onBlur={() => testValidity(usngbbUpperLeft)}
       />
       <TextField
         label="Lower Right"
         style={{ minWidth: 200 }}
         value={usngbbLowerRight}
-        onChange={cursor('usngbbLowerRight')}
+        onChange={(usngbbLowerRight) => setState('usngbbLowerRight', usngbbLowerRight)}
+        onBlur={() => testValidity(usngbbLowerRight)}
       />
+      {error ? (
+        <Invalid>
+          <WarningIcon className="fa fa-warning" />
+          <span>Invalid USNG / MGRS coords</span>
+        </Invalid>
+      ) : null}
     </div>
   )
 }
