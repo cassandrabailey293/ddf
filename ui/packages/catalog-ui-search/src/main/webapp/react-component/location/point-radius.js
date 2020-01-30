@@ -40,7 +40,7 @@ const PointRadiusLatLon = props => {
   function onBlurLatLon(key, value) {
     props.callback
     let { errorMsg, defaultCoord } = getLocationInputError(key, value)
-    setLatLonState({ error: value.length == 0, errorMsg: errorMsg, defaultValue: defaultCoord})
+    setLatLonState({ error: value !== undefined && value.length == 0, errorMsg: errorMsg, defaultValue: defaultCoord})
   }
   function onChangeRadius(value) {
     let { errorMsg } = getLocationInputError('radius', value)
@@ -140,30 +140,120 @@ const PointRadiusUtmUps = props => {
     utmUpsHemisphere,
     radius,
     radiusUnits,
-    cursor,
+    setState,
   } = props
+  let currentEasting
+  let currentNorthing
+  let currentZone
+  let currentHemisphere
+  let northernHemisphere
+  const [errorMessage, setErrorMessage] = useState()
+  const [radiusError, setRadiusError] = useState({ error: false, errorMsg: '' });
+  const letterRegex = /[a-z]/i
+  const northingOffset = 10000000
+  function upsValidDistance(distance) {
+    return distance >= 800000 && distance <= 3200000
+  }
+  function isLatLonValid(lat, lon) {
+    lat = parseFloat(lat)
+    lon = parseFloat(lon)
+    return lat > -90 && lat < 90 && lon > -180 && lon < 180
+  }
+  function onChangeRadius(value) {
+    let { errorMsg } = getLocationInputError('radius', value)
+    setRadiusError({ error: !locationInputValidators['radius'](value), errorMsg: errorMsg})
+    setState('radius', value)
+  }
+  function testValidity(key, value) {
+    debugger
+    if (key === 'utmUpsEasting') {
+      currentEasting = letterRegex.test(value) ? NaN : Number.parseFloat(value)
+    } else if (key === 'utmUpsNorthing') {
+      currentNorthing = letterRegex.test(value) ? NaN : Number.parseFloat(value)
+    } else if (key === 'utmUpsZone') {
+      currentZone = Number.parseInt(zone)
+    } else if (key === 'utmUpsHemisphere') {
+      currentHemisphere = hemisphere.toUpperCase()
+    }
+    if(currentEasting !== undefined && Number.isNaN(currentEasting)) {
+      setErrorMessage('Easting value is invalid')
+    }
+    if(currentNorthing !== undefined) {
+      if(Number.isNaN(currentNorthing)) {
+        setErrorMessage('Northing value is invalid')
+      } else if(!Number.isNaN(currentEasting)) {
+        northernHemisphere = currentHemisphere === 'NORTHERN'
+        const isUps = currentZone === 0
+        const utmUpsParts = {
+          easting: currentEasting,
+          northing: currentNorthing,
+          zoneNumber: currentZone,
+          hemisphere: currentHemisphere,
+          northPole: northernHemisphere,
+        }
+        utmUpsParts.northing =
+          isUps || northernHemisphere ? currentNorthing : currentNorthing - northingOffset
+        if (isUps && (!upsValidDistance(currentNorthing) || !upsValidDistance(currentEasting))) {
+          setErrorMessage('Invalid UPS distance')
+        }
+        let { lat, lon } = converter.UTMUPStoLL(utmUpsParts)
+        lon = lon % 360
+        if (lon < -180) {
+          lon = lon + 360
+        }
+        if (lon > 180) {
+          lon = lon - 360
+        }
+        if(!isLatLonValid(lat, lon)) {
+          setErrorMessage('Invalid UTM/UPS coordinates')
+        } else {
+          setErrorMessage('')
+        }
+      }
+    }
+    setState(key, value, false)
+  }
   return (
     <div>
       <TextField
         label="Easting"
         value={utmUpsEasting}
-        onChange={cursor('utmUpsEasting')}
+        onChange={(utmUpsEasting) => setState('utmUpsEasting', utmUpsEasting)}
+        onBlur={() => testValidity('utmUpsEasting', utmUpsEasting)}
         addon="m"
       />
       <TextField
         label="Northing"
         value={utmUpsNorthing}
-        onChange={cursor('utmUpsNorthing')}
+        onChange={(utmUpsNorthing) => setState('utmUpsNorthing', utmUpsNorthing)}
+        onBlur={() => testValidity('utmUpsNorthing', utmUpsNorthing)}
         addon="m"
       />
-      <Zone value={utmUpsZone} onChange={cursor('utmUpsZone')} />
+      <Zone
+        value={utmUpsZone}
+        onChange={(utmUpsZone) => setState('utmUpsZone', utmUpsZone)}
+        onBlur={() => testValidity('utmUpsZone', utmUpsZone)}
+      />
       <Hemisphere
         value={utmUpsHemisphere}
-        onChange={cursor('utmUpsHemisphere')}
+        onChange={(utmUpsHemisphere) => setState('utmUpsHemisphere', utmUpsHemisphere)}
+        onBlur={() => testValidity('utmUpsHemisphere', utmUpsHemisphere)}
       />
-      <Units value={radiusUnits} onChange={cursor('radiusUnits')}>
-        <TextField label="Radius" value={radius} onChange={cursor('radius')} />
+      {errorMessage ? (
+        <Invalid>
+          <WarningIcon className="fa fa-warning" />
+          <span>{ errorMessage }</span>
+        </Invalid>
+      ) : null}
+      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits)}>
+        <TextField label="Radius" value={String(radius)} onChange={(radius) => onChangeRadius(radius)} />
       </Units>
+      {radiusError.error ? (
+        <Invalid>
+          <WarningIcon className="fa fa-warning" />
+      <span>{radiusError.errorMsg}</span>
+        </Invalid>
+      ) : null}
     </div>
   )
 }
@@ -184,7 +274,7 @@ const PointRadiusDms = props => {
   const longitudeDirections = [Direction.East, Direction.West]
   function onChangeLatLon(key, value, type) {
     let { errorMsg, defaultCoord } = getLocationInputError(key, value)
-    setLatLonState({ error: type == 'blur' ? value.length == 0 : !locationInputValidators[key](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
+    setLatLonState({ error: type == 'blur' ? (value !== undefined && value.length == 0) : !locationInputValidators[key](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
     if(defaultCoord && defaultCoord.length != 0) {
       value = defaultCoord
     }

@@ -122,8 +122,9 @@ export const locationInputValidators: {[key: string]: (value: string) => boolean
 export function getLocationInputError(key: string, value: string):{errorMsg:string, defaultCoord?:number} {
   let errorMsg: string = ''
   let defaultCoord;
-  console.log(">>>>>", locationInputValidators)
-  console.log(">>>>>", locationInputValidators[key])
+  if (value === undefined) {
+    return { errorMsg, defaultCoord }
+  }
   if (key === 'radius') {
     errorMsg = ' Radius cannot be empty or less than 0.00001.  '
   } else if (value !== undefined && value.length === 0) {

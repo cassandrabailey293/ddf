@@ -51,7 +51,7 @@ const BoundingBoxLatLon = props => {
   }
   function onBlurLatLon(key, value) {
     let { errorMsg, defaultCoord } = getLocationInputError(key, value)
-    setLatLonState({ error: value.length == 0, errorMsg: errorMsg, defaultValue: defaultCoord})
+    setLatLonState({ error: value !== undefined && value.length == 0, errorMsg: errorMsg, defaultValue: defaultCoord})
   }
   return (
     <div className="input-location">
@@ -245,7 +245,7 @@ const BoundingBoxDms = props => {
 
   function onChangeLatLon(key, value, type) {
     let { errorMsg, defaultCoord } = getLocationInputError(key, value)
-    setLatLonState({ error: type == 'blur' ? value.length == 0 : !locationInputValidators[key](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
+    setLatLonState({ error: type == 'blur' ? (value !== undefined && value.length == 0) : !locationInputValidators[key](value), errorMsg: errorMsg, defaultValue: defaultCoord || ''})
     if(defaultCoord && defaultCoord.length != 0) {
       value = defaultCoord
     }

@@ -70,7 +70,7 @@ class BaseLine extends React.Component {
               this.setState({ value })
               // TODO: allow model to update with invalid values
               try {
-                setState(geometryKey, JSON.parse(value), (errors = false))
+                setState(geometryKey, JSON.parse(value), false)
               } catch (e) {
                 // do nothing
               }
