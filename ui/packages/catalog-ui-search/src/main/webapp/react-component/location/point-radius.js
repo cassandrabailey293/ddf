@@ -114,18 +114,16 @@ const PointRadiusUtmUps = props => {
     return lat > -90 && lat < 90 && lon > -180 && lon < 180
   }
   function testValidity() {
+    utmUpsZone = Number.parseInt(utmUpsZone)
+    utmUpsHemisphere = utmUpsHemisphere.toUpperCase()
     if(utmUpsEasting !== undefined) {
       utmUpsEasting = letterRegex.test(utmUpsEasting) ? NaN : Number.parseFloat(utmUpsEasting)
+      if(Number.isNaN(utmUpsEasting)) {
+        setError({error: true, message: 'Easting value is invalid'})
+      }
     }
     if(utmUpsNorthing !== undefined) {
       utmUpsNorthing = letterRegex.test(utmUpsNorthing) ? NaN : Number.parseFloat(utmUpsNorthing)
-    }
-    utmUpsZone = Number.parseInt(utmUpsZone)
-    utmUpsHemisphere = utmUpsHemisphere.toUpperCase()
-    if (utmUpsEasting !== undefined && Number.isNaN(utmUpsEasting)) {
-      setError({error: true, message: 'Easting value is invalid'})
-    }
-    if(utmUpsNorthing !== undefined) {
       if(Number.isNaN(utmUpsNorthing)) {
         setError({error: true, message: 'Northing value is invalid'})
       } else if(!Number.isNaN(utmUpsEasting)) {
@@ -140,7 +138,7 @@ const PointRadiusUtmUps = props => {
         }
         utmUpsParts.northing = isUps || northernHemisphere ? utmUpsNorthing : utmUpsNorthing - northingOffset
         if (isUps && (!upsValidDistance(utmUpsNorthing) || !upsValidDistance(utmUpsEasting))) {
-          setError({error: true, message: 'Invalid UPS distance' })
+          setError({error: true, message: 'Invalid UPS distance'})
         }
         let { lat, lon } = converter.UTMUPStoLL(utmUpsParts)
         lon = lon % 360
@@ -150,7 +148,6 @@ const PointRadiusUtmUps = props => {
         if (lon > 180) {
           lon = lon - 360
         }
-
         if(!isLatLonValid(lat, lon)) {
           setError({error: true, message: 'Invalid UTM/UPS coordinates'})
         } else {
