@@ -117,23 +117,15 @@ const Root = styled.div`
 `
 
 const Component = CustomElements.registerReact('location')
-let errors = false
-let errorMsg = ''
-let inValidInput = ''
-let inValidKey = ''
-let defaultCoord = ''
 const LocationInput = props => {
-  const { mode, setState, cursor } = props
+  const { mode, setState } = props
   const input = inputs[mode] || {}
   const { Component: Input = null } = input
-  const removeErrorBox = () => {
-    setState((errors = false))
-  }
   return (
     <Root isOpen={input.label !== undefined}>
       <Component>
         <Dropdown label={input.label || 'Select Location Option'}>
-          <Menu value={mode} onChange={cursor('mode')}>
+          <Menu value={mode} onChange={(mode) => setState('mode', mode)}>
             {Object.keys(inputs).map(key => (
               <MenuItem key={key} value={key}>
                 {inputs[key].label}
@@ -143,16 +135,6 @@ const LocationInput = props => {
         </Dropdown>
         <Form>
           {Input !== null ? <Input {...props} /> : null}
-          {errors ? (
-            <Invalid>
-              &nbsp;
-              <span className="fa fa-exclamation-triangle" />
-              {errorMsg}
-              <span className="fa fa-times" onClick={removeErrorBox} />
-            </Invalid>
-          ) : (
-            ''
-          )}
           {drawTypes.includes(mode) ? (
             <DrawButton onDraw={props.onDraw} />
           ) : null}
@@ -162,88 +144,13 @@ const LocationInput = props => {
   )
 }
 
-const ddValidators = {
-  lat: value => value <= 90 && value >= -90 && value.length != 0,
-  lon: value => value <= 180 && value >= -180 && value.length != 0,
-  north: value => value <= 90 && value >= -90 && value.length != 0,
-  west: value => value <= 180 && value >= -180 && value.length != 0,
-  south: value => value <= 90 && value >= -90 && value.length != 0,
-  east: value => value <= 180 && value >= -180 && value.length != 0,
-  radius: value => value >= 0.000001,
-  lineWidth: value => value >= 0.000001,
-}
-
-let isDms = false
-const dmsValidators = {
-  dmsLat: value => validateInput(value, 'dd°mm\'ss.s"'),
-  dmsLon: value => validateInput(value, 'ddd°mm\'ss.s"'),
-  dmsNorth: value => validateInput(value, 'dd°mm\'ss.s"'),
-  dmsSouth: value => validateInput(value, 'dd°mm\'ss.s"'),
-  dmsWest: value => validateInput(value, 'ddd°mm\'ss.s"'),
-  dmsEast: value => validateInput(value, 'ddd°mm\'ss.s"'),
-}
-
-const getNegOrPosLatLon = (key, value) => {
-  if (value < 0) {
-    return -1 * validLatLon[key]
-  } else {
-    return validLatLon[key]
-  }
-}
-
 module.exports = ({ state, setState, options }) => (
   <LocationInput
     {...state}
     onDraw={options.onDraw}
     setState={setState}
     cursor={key => value => {
-      isDms = false
-      let coordValidator = ddValidators[key]
-      if (coordValidator === undefined) {
-        coordValidator = dmsValidators[key]
-        isDms = true
-      }
-      if (!isDms) {
-        if (typeof coordValidator === 'function' && !coordValidator(value)) {
-          errors = true
-          inValidInput = value
-          inValidKey = readableNames[key]
-          defaultCoord = getNegOrPosLatLon(key, value)
-          if (key === 'radius') {
-            errorMsg = ' Radius cannot be empty or less than 0.00001.  '
-          } else if (value.length === 0) {
-            errorMsg = ' ' + inValidKey.replace(/^\w/, c => c.toUpperCase()) + ' cannot be empty.  '
-          } else {
-            errorMsg =
-              ' ' +
-              inValidInput +
-              ' is not an acceptable ' +
-              inValidKey +
-              ' value. Defaulting to ' +
-              defaultCoord +
-              '.  '
-            value = defaultCoord
-          }
-          setState(key, value)
-          return
-        }
-        setState(key, value, (errors = false))
-      } else {
-        if (
-          typeof coordValidator === 'function' &&
-          coordValidator(value) !== value &&
-          value !== ''
-        ) {
-          errors = true
-          inValidInput = value
-          inValidKey = readableNames[key]
-          defaultCoord = coordValidator(value)
-          value = defaultCoord
-          setState(key, value)
-          return
-        }
-        setState(key, value, (errors = false))
-      }
-    }}
+        setState(key, value, false)
+      }}
   />
 )
