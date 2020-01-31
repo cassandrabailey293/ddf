@@ -99,12 +99,8 @@ const PointRadiusUsngMgrs = props => {
   const [radiusError, setRadiusError] = useState({ error: false, errorMsg: '' });
   const { usng, radius, radiusUnits, setState } = props
   function testValidity(usng) {
-    try {
-      const result = converter.USNGtoLL(usng, true)
-      setError(Number.isNaN(result.lat) || Number.isNaN(result.lon))
-    } catch (err) {
-      setError(true)
-    }
+    const result = converter.USNGtoLL(usng, true)
+    setError(Number.isNaN(result.lat) || Number.isNaN(result.lon))
   }
   function onChangeRadius(value) {
     let { errorMsg } = getLocationInputError('radius', value)
