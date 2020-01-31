@@ -152,8 +152,8 @@ const BoundingBoxUtmUps = props => {
     utmUpsLowerRightHemisphere,
     setState,
   } = props
-  const [upperLeftErrorMessage, setUpperLeftErrorMessage] = useState()
-  const [lowerRightErrorMessage, setLowerRightErrorMessage] = useState()
+  const [upperLeftError, setUpperLeftError] = useState({ error: false, message: ''})
+  const [lowerRightError, setLowerRightError] = useState({ error: false, message: ''})
   const letterRegex = /[a-z]/i
   const northingOffset = 10000000
   function upsValidDistance(distance) {
@@ -164,52 +164,53 @@ const BoundingBoxUtmUps = props => {
     lon = parseFloat(lon)
     return lat > -90 && lat < 90 && lon > -180 && lon < 180
   }
-  function testUtmUpsValidity(easting, northing, zoneNumber, hemisphere, setErrorMessage) {
+  function testUtmUpsValidity(easting, northing, zoneNumber, hemisphere, setError) {
     zoneNumber = Number.parseInt(zoneNumber)
     hemisphere = hemisphere.toUpperCase()
     if(easting !== undefined) {
       easting = letterRegex.test(easting) ? NaN : Number.parseFloat(easting)
       if(Number.isNaN(easting)) {
-        setErrorMessage('Easting value is invalid')
+        setError({error: true, message: 'Easting value is invalid'})
       }
     }
     if(northing !== undefined) {
       northing = letterRegex.test(northing) ? NaN : Number.parseFloat(northing)
       if(Number.isNaN(northing)) {
-        setErrorMessage('Northing value is invalid')
-      } else if(!Number.isNaN(easting)) {
-        const northernHemisphere = hemisphere === 'NORTHERN'
-        const isUps = zoneNumber === 0
-        const utmUpsParts = {
-          easting,
-          northing,
-          zoneNumber,
-          hemisphere,
-          northPole: northernHemisphere,
-        }
-        utmUpsParts.northing = isUps || northernHemisphere ? northing : northing - northingOffset
-        if (isUps && (!upsValidDistance(northing) || !upsValidDistance(easting))) {
-          setErrorMessage('Invalid UPS distance')
-        }
-        let { lat, lon } = converter.UTMUPStoLL(utmUpsParts)
-        lon = lon % 360
-        if (lon < -180) {
-          lon = lon + 360
-        }
-        if (lon > 180) {
-          lon = lon - 360
-        }
-        if(!isLatLonValid(lat, lon)) {
-          setErrorMessage('Invalid UTM/UPS coordinates')
-        } else {
-          setErrorMessage('')
-        }
+        setError({error: true, message: 'Northing value is invalid'})
+      }
+    }
+    if(northing !== undefined && easting !== undefined) {
+      const northernHemisphere = hemisphere === 'NORTHERN'
+      const isUps = zoneNumber === 0
+      const utmUpsParts = {
+        easting,
+        northing,
+        zoneNumber,
+        hemisphere,
+        northPole: northernHemisphere,
+      }
+      utmUpsParts.northing = isUps || northernHemisphere ? northing : northing - northingOffset
+      if (isUps && (!upsValidDistance(northing) || !upsValidDistance(easting))) {
+        setError({error: true, message: 'Invalid UPS distance'})
+      }
+      let { lat, lon } = converter.UTMUPStoLL(utmUpsParts)
+      lon = lon % 360
+      if (lon < -180) {
+        lon = lon + 360
+      }
+      if (lon > 180) {
+        lon = lon - 360
+      }
+      if(!isLatLonValid(lat, lon)) {
+        setError({ error: true, message: 'Invalid UTM/UPS coordinates'})
+      } else {
+        setError({ error: false, message: '' })
       }
     }
   }
   function testValidity() {
-    testUtmUpsValidity(utmUpsUpperLeftEasting, utmUpsUpperLeftNorthing, utmUpsUpperLeftZone, utmUpsUpperLeftHemisphere, setUpperLeftErrorMessage)
-    testUtmUpsValidity(utmUpsLowerRightEasting, utmUpsLowerRightNorthing, utmUpsLowerRightZone, utmUpsLowerRightHemisphere, setLowerRightErrorMessage)
+    testUtmUpsValidity(utmUpsUpperLeftEasting, utmUpsUpperLeftNorthing, utmUpsUpperLeftZone, utmUpsUpperLeftHemisphere, setUpperLeftError)
+    testUtmUpsValidity(utmUpsLowerRightEasting, utmUpsLowerRightNorthing, utmUpsLowerRightZone, utmUpsLowerRightHemisphere, setLowerRightError)
   }
   return (
     <div>
@@ -227,7 +228,7 @@ const BoundingBoxUtmUps = props => {
             <TextField
               label="Northing"
               value={utmUpsUpperLeftNorthing}
-              onChange={value => ('utmUpsUpperLeftNorthing', value)}
+              onChange={value => setState('utmUpsUpperLeftNorthing', value)}
               onBlur={() => testValidity()}
               addon="m"
             />
@@ -243,12 +244,7 @@ const BoundingBoxUtmUps = props => {
             />
           </div>
         </Group>
-        {upperLeftErrorMessage ? (
-          <Invalid>
-            <WarningIcon className="fa fa-warning" />
-            <span>{ upperLeftErrorMessage }</span>
-          </Invalid>
-        ) : null}
+        {getErrorComponent(upperLeftError)}
       </div>
       <div className="input-location">
         <Group>
@@ -280,12 +276,7 @@ const BoundingBoxUtmUps = props => {
             />
           </div>
         </Group>
-        {lowerRightErrorMessage ? (
-          <Invalid>
-            <WarningIcon className="fa fa-warning" />
-            <span>{ lowerRightErrorMessage }</span>
-          </Invalid>
-        ) : null}
+        {getErrorComponent(lowerRightError)}
       </div>
     </div>
   )
