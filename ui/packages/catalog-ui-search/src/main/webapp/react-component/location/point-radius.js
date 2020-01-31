@@ -165,6 +165,10 @@ const PointRadiusUtmUps = props => {
     setState('radius', value)
   }
   function testValidity(key, value) {
+    currentNorthing = utmUpsNorthing
+    currentEasting = utmUpsEasting
+    currentZone = utmUpsZone
+    currentHemisphere = utmUpsHemisphere
     debugger
     if (key === 'utmUpsEasting') {
       currentEasting = letterRegex.test(value) ? NaN : Number.parseFloat(value)
@@ -174,7 +178,7 @@ const PointRadiusUtmUps = props => {
       currentZone = Number.parseInt(zone)
     } else if (key === 'utmUpsHemisphere') {
       currentHemisphere = hemisphere.toUpperCase()
-    }
+    } 
     if(currentEasting !== undefined && Number.isNaN(currentEasting)) {
       setErrorMessage('Easting value is invalid')
     }
