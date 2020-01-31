@@ -29,23 +29,10 @@ const PointRadiusLatLon = props => {
   const [latlonState, setLatLonState] = useState({ error: false, message: '', defaultValue: '' });
   const [radiusError, setRadiusError] = useState({ error: false, message: '' });
   const { lat, lon, radius, radiusUnits, setState } = props
-  function onChangeLatLon(key, value) {
-    let { errorMsg, defaultCoord } = getLocationInputError(key, value)
-    setLatLonState({ error: !locationInputValidators[key](value), message: errorMsg, defaultValue: defaultCoord || ''})
-    if(defaultCoord && defaultCoord.length != 0) {
-      value = defaultCoord
-    }
-    setState(key, value)
-  }
   function onBlurLatLon(key, value) {
     props.callback
     let { errorMsg, defaultCoord } = getLocationInputError(key, value)
     setLatLonState({ error: value !== undefined && value.length == 0, message: errorMsg, defaultValue: defaultCoord})
-  }
-  function onChangeRadius(value) {
-    let { errorMsg } = getLocationInputError('radius', value)
-    setRadiusError({ error: !locationInputValidators['radius'](value), message: errorMsg})
-    setState('radius', value)
   }
   return (
     <div>
@@ -53,7 +40,7 @@ const PointRadiusLatLon = props => {
         type="number"
         label="Latitude"
         value={lat}
-        onChange={(lat) => onChangeLatLon('lat', lat)}
+        onChange={(lat) => onChangeLatLon('lat', lat, setLatLonState, setState)}
         onBlur={() => onBlurLatLon('lat', lat)}
         onFocus={() => {setLatLonState({ error: false, message: '', defaultValue: '' })}}
         addon="°"
@@ -62,7 +49,7 @@ const PointRadiusLatLon = props => {
         type="number"
         label="Longitude"
         value={lon}
-        onChange={(lon) => onChangeLatLon('lon', lon)}
+        onChange={(lon) => onChangeLatLon('lon', lon, setLatLonState, setState)}
         onBlur={() => onBlurLatLon('lon', lon)}
         addon="°"
       />
@@ -73,7 +60,7 @@ const PointRadiusLatLon = props => {
           min="0"
           label="Radius"
           value={radius}
-          onChange={(radius) => onChangeRadius(radius)}
+          onChange={(radius) => onChangeRadius(radius, setRadiusError, setState)}
         />
       </Units>
       {getErrorComponent(radiusError)}
@@ -92,17 +79,12 @@ const PointRadiusUsngMgrs = props => {
     const result = converter.USNGtoLL(usng, true)
     setError({ error: Number.isNaN(result.lat) || Number.isNaN(result.lon), message: 'Invalid USNG / MGRS coords'})
   }
-  function onChangeRadius(value) {
-    let { errorMsg } = getLocationInputError('radius', value)
-    setRadiusError({ error: !locationInputValidators['radius'](value), message: errorMsg})
-    setState('radius', value)
-  }
   return (
     <div>
       <TextField label="USNG / MGRS" value={usng} onChange={(usng) => setState('usng', usng)} onBlur={() => testValidity(usng)} />
       {getErrorComponent(error)}
       <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits)}>
-        <TextField label="Radius" value={radius} onChange={(radius) => onChangeRadius(radius)} />
+        <TextField label="Radius" value={radius} onChange={(radius) => onChangeRadius(radius, setRadiusError, setState)} />
       </Units>
       {getErrorComponent(radiusError)}
     </div>
@@ -226,25 +208,12 @@ const PointRadiusDms = props => {
   } = props
   const latitudeDirections = [Direction.North, Direction.South]
   const longitudeDirections = [Direction.East, Direction.West]
-  function onChangeLatLon(key, value, type) {
-    let { errorMsg, defaultCoord } = getLocationInputError(key, value)
-    setLatLonState({ error: type == 'blur' ? (value !== undefined && value.length == 0) : !locationInputValidators[key](value), message: errorMsg, defaultValue: defaultCoord || ''})
-    if(defaultCoord && defaultCoord.length != 0) {
-      value = defaultCoord
-    }
-    setState(key, value)
-  }
-  function onChangeRadius(value) {
-    let { errorMsg } = getLocationInputError('radius', value)
-    setRadiusError({ error: !locationInputValidators['radius'](value), message: errorMsg})
-    setState('radius', value)
-  }
   return (
     <div>
       <DmsLatitude 
         label="Latitude" 
         value={dmsLat} 
-        onChange={(dmsLat, type) => onChangeLatLon('dmsLat', dmsLat, type)}>
+        onChange={(dmsLat, type) => onChangeDms('dmsLat', dmsLat, type, setLatLonState, setState)}>
         <DirectionInput
           options={latitudeDirections}
           value={dmsLatDirection}
@@ -254,7 +223,7 @@ const PointRadiusDms = props => {
       <DmsLongitude
         label="Longitude"
         value={dmsLon}
-        onChange={(dmsLon, type) => onChangeLatLon('dmsLon', dmsLon, type)}>
+        onChange={(dmsLon, type) => onChangeDms('dmsLon', dmsLon, type, setLatLonState, setState)}>
         <DirectionInput
           options={longitudeDirections}
           value={dmsLonDirection}
@@ -267,7 +236,7 @@ const PointRadiusDms = props => {
           label="Radius"
           type="number"
           value={radius}
-          onChange={(radius) => onChangeRadius(radius)}
+          onChange={(radius) => onChangeRadius(radius, setRadiusError, setState)}
         />
       </Units>
       {getErrorComponent(radiusError)}
@@ -302,5 +271,37 @@ const PointRadius = props => {
     </div>
   )
 }
+
+
+/*
+**************
+HELPER METHODS
+**************
+*/
+
+function onChangeLatLon(key, value, setLatLonState, setState) {
+  let { errorMsg, defaultCoord } = getLocationInputError(key, value)
+  setLatLonState({ error: !locationInputValidators[key](value), message: errorMsg, defaultValue: defaultCoord || ''})
+  if(defaultCoord && defaultCoord.length != 0) {
+    value = defaultCoord
+  }
+  setState(key, value)
+}
+
+function onChangeDms(key, value, type, setLatLonState, setState) {
+  let { errorMsg, defaultCoord } = getLocationInputError(key, value)
+  setLatLonState({ error: type == 'blur' ? (value !== undefined && value.length == 0) : !locationInputValidators[key](value), message: errorMsg, defaultValue: defaultCoord || ''})
+  if(defaultCoord && defaultCoord.length != 0) {
+    value = defaultCoord
+  }
+  setState(key, value)
+}
+
+function onChangeRadius(value, setRadiusError, setState) {
+  let { errorMsg } = getLocationInputError('radius', value)
+  setRadiusError({ error: !locationInputValidators['radius'](value), message: errorMsg})
+  setState('radius', value)
+}
+
 
 module.exports = PointRadius
