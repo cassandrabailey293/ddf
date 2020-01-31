@@ -13,12 +13,19 @@
  *
  **/
 
-import { InvalidSearchFormMessage } from '../../../component/announcement/CommonMessages'
+const React = require('react')
+ import { InvalidSearchFormMessage } from '../../../component/announcement/CommonMessages'
 import styled from 'styled-components'
 const announcement = require('../../../component/announcement/index.jsx')
 const {
   validateInput,
 } = require('../../../component/location-new/utils/dms-utils')
+
+interface ErrorState {
+  error: boolean
+  message: string
+}
+
 export function showErrorMessages(errors: any) {
   if (errors.length === 0) {
     return
@@ -185,7 +192,11 @@ const getValidLatLon = (key:string, value:string) => {
   
 }
 
-export const Invalid = styled.div`
+/*
+Error Components
+*/
+
+const Invalid = styled.div`
   background-color: ${props => props.theme.negativeColor};
   height: 100%;
   display: block;
@@ -193,6 +204,15 @@ export const Invalid = styled.div`
   color: white;
 `
 
-export const WarningIcon = styled.span`
+const WarningIcon = styled.span`
   padding: ${({ theme }) => theme.minimumSpacing};
 `
+export function getErrorComponent(errorState: ErrorState) {
+  return errorState.error ? (
+    <Invalid>
+      <WarningIcon className="fa fa-warning" />
+      <span>{errorState.message}</span>
+    </Invalid>
+  ) : null
+}
+
