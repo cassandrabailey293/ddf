@@ -104,28 +104,6 @@ function getGeometryErrors(filter: any):Set<string> {
     return errors
 }
 
-const latValidator = (value: string) => Number(value) <= 90 && Number(value) >= -90
-const lonValidator = (value: string) => Number(value) <= 180 && Number(value) >= -180
-const dmsLatValidator = (value: string) => validateInput(value, 'dd°mm\'ss.s"') == value
-const dmsLonValidator = (value: string) => validateInput(value, 'ddd°mm\'ss.s"') == value
-
-export const locationInputValidators: {[key: string]: (value: string) => boolean} = {
-  lat: latValidator,
-  lon: lonValidator,
-  west: lonValidator,
-  east: lonValidator,
-  north: latValidator,
-  south: latValidator,
-  dmsLat: dmsLatValidator,
-  dmsLon: dmsLonValidator,
-  dmsNorth: dmsLatValidator,
-  dmsSouth: dmsLatValidator,
-  dmsWest: dmsLonValidator,
-  dmsEast: dmsLonValidator,
-  radius: (value: string | number) => value >= 0.000001,
-  lineWidth: (value: string | number) => value >= 0.000001,
-}
-
 export function getLocationInputError(key: string, value: string):{errorMsg:string, defaultCoord?:number} {
   let errorMsg: string = ''
   let defaultCoord;
@@ -148,6 +126,18 @@ export function getLocationInputError(key: string, value: string):{errorMsg:stri
   }
   return { errorMsg, defaultCoord }
 }
+
+/*
+**********
+Constants
+**********
+*/
+
+const latValidator = (value: string) => Number(value) <= 90 && Number(value) >= -90
+const lonValidator = (value: string) => Number(value) <= 180 && Number(value) >= -180
+const dmsLatValidator = (value: string) => validateInput(value, 'dd°mm\'ss.s"') == value
+const dmsLonValidator = (value: string) => validateInput(value, 'ddd°mm\'ss.s"') == value
+const widthValidator = (value: string | number) => value >= 0.000001 
 
 const readableNames: {[key: string]: string} = {
   lat: 'latitude',
@@ -176,6 +166,23 @@ const validLatLon: {[key:string]: string} = {
   dmsLon: '180°00\'00"',
 }
 
+export const locationInputValidators: {[key: string]: (value: string) => boolean} = {
+  lat: latValidator,
+  lon: lonValidator,
+  west: lonValidator,
+  east: lonValidator,
+  north: latValidator,
+  south: latValidator,
+  dmsLat: dmsLatValidator,
+  dmsLon: dmsLonValidator,
+  dmsNorth: dmsLatValidator,
+  dmsSouth: dmsLatValidator,
+  dmsWest: dmsLonValidator,
+  dmsEast: dmsLonValidator,
+  radius: widthValidator,
+  lineWidth: widthValidator,
+}
+
 const getValidLatLon = (key:string, value:string) => {
   // TODO: change equals
   if (key == 'dmsLat' || key == 'dmsNorth' || key == 'dmsSouth') {
@@ -189,11 +196,12 @@ const getValidLatLon = (key:string, value:string) => {
       return Number(validLatLon[key])
     }
   }
-  
 }
 
 /*
+****************
 Error Components
+****************
 */
 
 const Invalid = styled.div`
