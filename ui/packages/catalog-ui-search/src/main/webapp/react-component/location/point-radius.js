@@ -55,6 +55,7 @@ const PointRadiusLatLon = props => {
         value={lat}
         onChange={(lat) => onChangeLatLon('lat', lat)}
         onBlur={() => onBlurLatLon('lat', lat)}
+        onFocus={() => {setLatLonState({ error: false, errorMsg: '', defaultValue: '' })}}
         addon="°"
       />
       <TextField
@@ -133,7 +134,7 @@ const PointRadiusUsngMgrs = props => {
 }
 
 const PointRadiusUtmUps = props => {
-  const {
+  let {
     utmUpsEasting,
     utmUpsNorthing,
     utmUpsZone,
@@ -142,13 +143,8 @@ const PointRadiusUtmUps = props => {
     radiusUnits,
     setState,
   } = props
-  let currentEasting
-  let currentNorthing
-  let currentZone
-  let currentHemisphere
-  let northernHemisphere
   const [errorMessage, setErrorMessage] = useState()
-  const [radiusError, setRadiusError] = useState({ error: false, errorMsg: '' });
+  const [radiusError, setRadiusError] = useState(false)
   const letterRegex = /[a-z]/i
   const northingOffset = 10000000
   function upsValidDistance(distance) {
@@ -159,45 +155,33 @@ const PointRadiusUtmUps = props => {
     lon = parseFloat(lon)
     return lat > -90 && lat < 90 && lon > -180 && lon < 180
   }
-  function onChangeRadius(value) {
-    let { errorMsg } = getLocationInputError('radius', value)
-    setRadiusError({ error: !locationInputValidators['radius'](value), errorMsg: errorMsg})
-    setState('radius', value)
-  }
-  function testValidity(key, value) {
-    currentNorthing = utmUpsNorthing
-    currentEasting = utmUpsEasting
-    currentZone = utmUpsZone
-    currentHemisphere = utmUpsHemisphere
-    debugger
-    if (key === 'utmUpsEasting') {
-      currentEasting = letterRegex.test(value) ? NaN : Number.parseFloat(value)
-    } else if (key === 'utmUpsNorthing') {
-      currentNorthing = letterRegex.test(value) ? NaN : Number.parseFloat(value)
-    } else if (key === 'utmUpsZone') {
-      currentZone = Number.parseInt(zone)
-    } else if (key === 'utmUpsHemisphere') {
-      currentHemisphere = hemisphere.toUpperCase()
-    } 
-    if(currentEasting !== undefined && Number.isNaN(currentEasting)) {
+  function testValidity() {
+    if(utmUpsEasting !== undefined) {
+      utmUpsEasting = letterRegex.test(utmUpsEasting) ? NaN : Number.parseFloat(utmUpsEasting)
+    }
+    if(utmUpsNorthing !== undefined) {
+      utmUpsNorthing = letterRegex.test(utmUpsNorthing) ? NaN : Number.parseFloat(utmUpsNorthing)
+    }
+    utmUpsZone = Number.parseInt(utmUpsZone)
+    utmUpsHemisphere = utmUpsHemisphere.toUpperCase()
+    if(utmUpsEasting !== undefined && Number.isNaN(utmUpsEasting)) {
       setErrorMessage('Easting value is invalid')
     }
-    if(currentNorthing !== undefined) {
-      if(Number.isNaN(currentNorthing)) {
+    if(utmUpsNorthing !== undefined) {
+      if(Number.isNaN(utmUpsNorthing)) {
         setErrorMessage('Northing value is invalid')
-      } else if(!Number.isNaN(currentEasting)) {
-        northernHemisphere = currentHemisphere === 'NORTHERN'
-        const isUps = currentZone === 0
+      } else if(!Number.isNaN(utmUpsEasting)) {
+        const northernHemisphere = utmUpsHemisphere === 'NORTHERN'
+        const isUps = utmUpsZone === 0
         const utmUpsParts = {
-          easting: currentEasting,
-          northing: currentNorthing,
-          zoneNumber: currentZone,
-          hemisphere: currentHemisphere,
+          easting: utmUpsEasting,
+          northing: utmUpsNorthing,
+          zoneNumber: utmUpsZone,
+          hemisphere: utmUpsHemisphere,
           northPole: northernHemisphere,
         }
-        utmUpsParts.northing =
-          isUps || northernHemisphere ? currentNorthing : currentNorthing - northingOffset
-        if (isUps && (!upsValidDistance(currentNorthing) || !upsValidDistance(currentEasting))) {
+        utmUpsParts.northing = isUps || northernHemisphere ? utmUpsNorthing : utmUpsNorthing - northingOffset
+        if (isUps && (!upsValidDistance(utmUpsNorthing) || !upsValidDistance(utmUpsEasting))) {
           setErrorMessage('Invalid UPS distance')
         }
         let { lat, lon } = converter.UTMUPStoLL(utmUpsParts)
@@ -215,33 +199,32 @@ const PointRadiusUtmUps = props => {
         }
       }
     }
-    setState(key, value, false)
   }
   return (
     <div>
       <TextField
         label="Easting"
         value={utmUpsEasting}
-        onChange={(utmUpsEasting) => setState('utmUpsEasting', utmUpsEasting)}
-        onBlur={() => testValidity('utmUpsEasting', utmUpsEasting)}
+        onChange={value => setState('utmUpsEasting', value)}
+        onBlur={() => testValidity()}
         addon="m"
       />
       <TextField
         label="Northing"
         value={utmUpsNorthing}
-        onChange={(utmUpsNorthing) => setState('utmUpsNorthing', utmUpsNorthing)}
-        onBlur={() => testValidity('utmUpsNorthing', utmUpsNorthing)}
+        onChange={value => setState('utmUpsNorthing', value)}
+        onBlur={() => testValidity()}
         addon="m"
       />
       <Zone
         value={utmUpsZone}
-        onChange={(utmUpsZone) => setState('utmUpsZone', utmUpsZone)}
-        onBlur={() => testValidity('utmUpsZone', utmUpsZone)}
+        onChange={value => setState('utmUpsZone', value)}
+        onBlur={() => testValidity()}
       />
       <Hemisphere
         value={utmUpsHemisphere}
-        onChange={(utmUpsHemisphere) => setState('utmUpsHemisphere', utmUpsHemisphere)}
-        onBlur={() => testValidity('utmUpsHemisphere', utmUpsHemisphere)}
+        onChange={value => setState('utmUpsHemisphere', value)}
+        onBlur={() => testValidity()}
       />
       {errorMessage ? (
         <Invalid>
@@ -249,15 +232,15 @@ const PointRadiusUtmUps = props => {
           <span>{ errorMessage }</span>
         </Invalid>
       ) : null}
-      <Units value={radiusUnits} onChange={(radiusUnits) => setState('radiusUnits', radiusUnits)}>
-        <TextField label="Radius" value={String(radius)} onChange={(radius) => onChangeRadius(radius)} />
+      <Units value={radiusUnits} onChange={value => setState('radiusUnits', value)}>
+        <TextField label="Radius" value={String(radius)} onChange={value => setState('radius', value)} onBlur={() => setRadiusError(radius > 0.000001)} />
       </Units>
-      {radiusError.error ? (
-        <Invalid>
-          <WarningIcon className="fa fa-warning" />
-      <span>{radiusError.errorMsg}</span>
-        </Invalid>
-      ) : null}
+       {radiusError ? (
+          <Invalid>
+            <WarningIcon className="fa fa-warning" />
+            <span>Radius must be greater than 0.000001</span>
+          </Invalid>
+        ) : null}
     </div>
   )
 }
