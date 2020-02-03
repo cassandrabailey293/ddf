@@ -151,9 +151,9 @@ const BaseLine = props => {
     }
   }
 
-  function onChangeWidth(value) {
-    let { errorMsg } = getLocationInputError('lineWidth', value)
-    setWidthError({ error: !locationInputValidators['lineWidth'](value), message: errorMsg})
+  function onChangeWidth(widthKey, value) {
+    let { errorMsg } = getLocationInputError(widthKey, value)
+    setWidthError({ error: !locationInputValidators[widthKey](value), message: errorMsg})
     setState(widthKey, value)
   }
 
@@ -185,7 +185,7 @@ const BaseLine = props => {
             type="number"
             label="Buffer width"
             value={String(props[widthKey])}
-            onChange={(width) => onChangeWidth(width)}
+            onChange={(width) => onChangeWidth(widthKey, width)}
           />
         </Units>
         {getErrorComponent(widthError)}

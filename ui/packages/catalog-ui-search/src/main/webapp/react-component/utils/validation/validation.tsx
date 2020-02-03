@@ -107,7 +107,7 @@ function getGeometryErrors(filter: any):Set<string> {
 export function getLocationInputError(key: string, value: string):{errorMsg:string, defaultCoord?:number} {
   let errorMsg: string = ''
   let defaultCoord;
-  if (value === undefined) {
+  if (value === undefined || key == 'polygonBufferWidth') {
     return { errorMsg, defaultCoord }
   }
   if (key === 'radius') {
@@ -153,6 +153,7 @@ const readableNames: {[key: string]: string} = {
   dmsWest: 'longitude',
   dmsEast: 'longitude',
   lineWidth: 'buffer width',
+  polygonBufferWidth: 'buffer width'
 }
 
 const validLatLon: {[key:string]: string} = {
@@ -181,6 +182,7 @@ export const locationInputValidators: {[key: string]: (value: string) => boolean
   dmsEast: dmsLonValidator,
   radius: widthValidator,
   lineWidth: widthValidator,
+  polygonBufferWidth: () => true
 }
 
 const getValidLatLon = (key:string, value:string) => {
