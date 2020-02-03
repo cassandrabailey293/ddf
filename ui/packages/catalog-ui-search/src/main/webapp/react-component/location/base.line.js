@@ -109,9 +109,9 @@ const BaseLine = props => {
     }
   } */
 
-  // useEffect(() => {
-  //   setCuurentValue(currentValue)
-  // })
+  useEffect(() => {
+    setCurrentValue(currentValue)
+  })
 
   function validateListOfPoints(coordinates) {
     let message = ''
