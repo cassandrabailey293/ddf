@@ -13,7 +13,7 @@
  *
  **/
 import React, { useState, useEffect } from 'react'
-import { getErrorComponent } from '../utils/validation'
+import { getErrorComponent, validateGeo } from '../utils/validation'
 const { Units } = require('./common')
 const TextField = require('../text-field')
 
@@ -155,8 +155,7 @@ const BaseLine = props => {
   }
 
   function onChangeWidth(widthKey, value) {
-    let { errorMsg } = getLocationInputError(widthKey, value)
-    setWidthError({ error: !locationInputValidators[widthKey](value), message: errorMsg})
+    setWidthError(validateGeo(widthKey, value))
     setState(widthKey, value)
   }
 
