@@ -13,69 +13,54 @@
  *
  **/
 import React, { useState } from 'react'
-
+import { validateGeo, getErrorComponent } from '../utils/validation'
 const Group = require('../group')
 const Label = require('./label')
 const TextField = require('../text-field')
 const { Radio, RadioItem } = require('../radio')
-
 const { Zone, Hemisphere, MinimumSpacing } = require('./common')
-
 const {
   DmsLatitude,
   DmsLongitude,
 } = require('../../component/location-new/geo-components/coordinates.js')
 const DirectionInput = require('../../component/location-new/geo-components/direction.js')
 const { Direction } = require('../../component/location-new/utils/dms-utils.js')
-import {
-  locationInputValidators,
-  getLocationInputError,
-  getErrorComponent,
-} from '../utils/validation'
 
 const minimumDifference = 0.0001
 
 const BoundingBoxLatLonDd = props => {
-  const [latlonState, setLatLonState] = useState({
+  const {
+    north,
+    east,
+    south,
+    west,
+    setState,
+    mapEast,
+    mapWest,
+    mapSouth,
+    mapNorth,
+  } = props
+  const [ddError, setDdError] = useState({
     error: false,
     message: '',
     defaultValue: '',
   })
-  const { north, east, south, west, setState } = props
-
-  const { mapEast, mapWest, mapSouth, mapNorth } = props
-
   const westMax = parseFloat(mapEast) - minimumDifference
   const eastMin = parseFloat(mapWest) + minimumDifference
   const northMin = parseFloat(mapSouth) + minimumDifference
   const southMax = parseFloat(mapNorth) - minimumDifference
-  function onChangeLatLon(key, value) {
-    let { errorMsg, defaultCoord } = getLocationInputError(key, value)
-    setLatLonState({
-      error: !locationInputValidators[key](value),
-      message: errorMsg,
-      defaultValue: defaultCoord || '',
-    })
-    if (defaultCoord && defaultCoord.length != 0) {
-      value = defaultCoord
-    }
-    setState(key, value)
-  }
-  function onBlurLatLon(key, value) {
-    let { errorMsg, defaultCoord } = getLocationInputError(key, value)
-    setLatLonState({
-      error: value !== undefined && value.length == 0,
-      message: errorMsg,
-      defaultValue: defaultCoord,
-    })
-  }
   return (
     <div className="input-location">
       <TextField
         label="West"
-        value={west}
-        onChange={west => onChangeLatLon('west', west)}
-        onBlur={() => onBlurLatLon('west', west)}
+        value={west !== undefined ? String(west) : west}
+        onChange={value => {
+          setDdError(validateGeo('west', value))
+          ddError.defaultValue
+            ? setState('west', ddError.defaultValue)
+            : setState('west', value)
+        }}
+        onBlur={() => setDdError(validateGeo('west', west))}
         type="number"
         step="any"
         min={-180}
@@ -84,9 +69,14 @@ const BoundingBoxLatLonDd = props => {
       />
       <TextField
         label="South"
-        value={south}
-        onChange={south => onChangeLatLon('south', south)}
-        onBlur={() => onBlurLatLon('south', south)}
+        value={south !== undefined ? String(south) : south}
+        onChange={value => {
+          setDdError(validateGeo('south', value))
+          ddError.defaultValue
+            ? setState('south', ddError.defaultValue)
+            : setState('south', value)
+        }}
+        onBlur={() => setDdError(validateGeo('south', south))}
         type="number"
         step="any"
         min={-90}
@@ -95,9 +85,14 @@ const BoundingBoxLatLonDd = props => {
       />
       <TextField
         label="East"
-        value={east}
-        onChange={east => onChangeLatLon('east', east)}
-        onBlur={() => onBlurLatLon('east', east)}
+        value={east !== undefined ? String(east) : east}
+        onChange={value => {
+          setDdError(validateGeo('east', value))
+          ddError.defaultValue
+            ? setState('east', ddError.defaultValue)
+            : setState('east', value)
+        }}
+        onBlur={() => setDdError(validateGeo('east', east))}
         type="number"
         step="any"
         min={eastMin || -180}
@@ -106,159 +101,129 @@ const BoundingBoxLatLonDd = props => {
       />
       <TextField
         label="North"
-        value={north}
-        onChange={north => onChangeLatLon('north', north)}
-        onBlur={() => onBlurLatLon('north', north)}
+        value={north !== undefined ? String(north) : north}
+        onChange={value => {
+          setDdError(validateGeo('north', value))
+          ddError.defaultValue
+            ? setState('north', ddError.defaultValue)
+            : setState('north', value)
+        }}
+        onBlur={() => setDdError(validateGeo('north', north))}
         type="number"
         step="any"
         min={northMin || -90}
         max={90}
         addon="°"
       />
-      {getErrorComponent(latlonState)}
+      {getErrorComponent(ddError)}
     </div>
   )
 }
 
 const BoundingBoxLatLonDms = props => {
-  const [latlonState, setLatLonState] = useState({
-    error: false,
-    errorMsg: '',
-    defaultValue: '',
-  })
   const {
     dmsSouth,
     dmsNorth,
     dmsWest,
     dmsEast,
-
     dmsSouthDirection,
     dmsNorthDirection,
     dmsWestDirection,
     dmsEastDirection,
-
     setState,
   } = props
-
+  const [dmsError, setDmsError] = useState({
+    error: false,
+    errorMsg: '',
+    defaultValue: '',
+  })
   const latitudeDirections = [Direction.North, Direction.South]
   const longitudeDirections = [Direction.East, Direction.West]
 
-  function onChangeLatLon(key, value, type) {
-    let { errorMsg, defaultCoord } = getLocationInputError(key, value)
-    setLatLonState({
+  function validate(key, type, value) {
+    const { error, message, defaultValue } = validateGeo(key, value)
+    setDmsError({
       error:
-        type == 'blur'
-          ? value !== undefined && value.length == 0
-          : !locationInputValidators[key](value),
-      message: errorMsg,
-      defaultValue: defaultCoord || '',
+        type === 'blur' ? value !== undefined && value.length === 0 : error,
+      message,
+      defaultValue,
     })
-    if (defaultCoord && defaultCoord.length != 0) {
-      value = defaultCoord
-    }
-    setState(key, value)
+    dmsError.defaultValue
+      ? setState(key, dmsError.defaultValue)
+      : setState(key, value)
   }
+
   return (
     <div className="input-location">
       <DmsLongitude
         label="West"
         value={dmsWest}
-        onChange={(dmsWest, type) => onChangeLatLon('dmsWest', dmsWest, type)}
+        onChange={(value, type) => validate('dmsWest', type, value)}
       >
         <DirectionInput
           options={longitudeDirections}
           value={dmsWestDirection}
-          onChange={dmsWestDirection =>
-            setState('dmsWestDirection', dmsWestDirection)
-          }
+          onChange={value => setState('dmsWestDirection', value)}
         />
       </DmsLongitude>
       <DmsLatitude
         label="South"
         value={dmsSouth}
-        onChange={(dmsSouth, type) =>
-          onChangeLatLon('dmsSouth', dmsSouth, type)
-        }
+        onChange={(value, type) => validate('dmsSouth', type, value)}
       >
         <DirectionInput
           options={latitudeDirections}
           value={dmsSouthDirection}
-          onChange={dmsSouthDirection =>
-            setState('dmsSouthDirection', dmsSouthDirection)
-          }
+          onChange={value => setState('dmsSouthDirection', value)}
         />
       </DmsLatitude>
       <DmsLongitude
         label="East"
         value={dmsEast}
-        onChange={(dmsEast, type) => onChangeLatLon('dmsEast', dmsEast, type)}
+        onChange={(value, type) => validate('dmsEast', type, value)}
       >
         <DirectionInput
           options={longitudeDirections}
           value={dmsEastDirection}
-          onChange={dmsEastDirection =>
-            setState('dmsEastDirection', dmsEastDirection)
-          }
+          onChange={value => setState('dmsEastDirection', value)}
         />
       </DmsLongitude>
       <DmsLatitude
         label="North"
         value={dmsNorth}
-        onChange={(dmsNorth, type) =>
-          onChangeLatLon('dmsNorth', dmsNorth, type)
-        }
+        onChange={(value, type) => validate('dmsNorth', type, value)}
       >
         <DirectionInput
           options={latitudeDirections}
           value={dmsNorthDirection}
-          onChange={dmsNorthDirection =>
-            setState('dmsNorthDirection', dmsNorthDirection)
-          }
+          onChange={value => setState('dmsNorthDirection', value)}
         />
       </DmsLatitude>
-      {getErrorComponent(latlonState)}
+      {getErrorComponent(dmsError)}
     </div>
   )
 }
 
-const usngs = require('usng.js')
-const converter = new usngs.Converter()
-
 const BoundingBoxUsngMgrs = props => {
-  const [error, setError] = useState({ error: false, message: '' })
   const { usngbbUpperLeft, usngbbLowerRight, setState } = props
-  function testValidity(usng) {
-    try {
-      const result = converter.USNGtoLL(usng, true)
-      setError({
-        error: Number.isNaN(result.lat) || Number.isNaN(result.lon),
-        message: 'Invalid USNG / MGRS coords',
-      })
-    } catch (err) {
-      setError({ error: true, message: '' })
-    }
-  }
+  const [usngError, setUsngError] = useState({ error: false, message: '' })
   return (
     <div className="input-location">
       <TextField
         label="Upper Left"
         style={{ minWidth: 200 }}
         value={usngbbUpperLeft}
-        onChange={usngbbUpperLeft =>
-          setState('usngbbUpperLeft', usngbbUpperLeft)
-        }
-        onBlur={() => testValidity(usngbbUpperLeft)}
+        onChange={value => setState('usngbbUpperLeft', value)}
+        onBlur={() => setUsngError(validateGeo('usng', usngbbUpperLeft))}
       />
       <TextField
         label="Lower Right"
         style={{ minWidth: 200 }}
         value={usngbbLowerRight}
-        onChange={usngbbLowerRight =>
-          setState('usngbbLowerRight', usngbbLowerRight)
-        }
-        onBlur={() => testValidity(usngbbLowerRight)}
+        onChange={value => setState('usngbbLowerRight', value)}
+        onBlur={() => setUsngError(validateGeo('usng', usngbbLowerRight))}
       />
-      {getErrorComponent(error)}
+      {getErrorComponent(usngError)}
     </div>
   )
 }
@@ -275,87 +240,14 @@ const BoundingBoxUtmUps = props => {
     utmUpsLowerRightHemisphere,
     setState,
   } = props
-  const [upperLeftErrorMessage, setUpperLeftErrorMessage] = useState()
-  const [lowerRightErrorMessage, setLowerRightErrorMessage] = useState()
-  const letterRegex = /[a-z]/i
-  const northingOffset = 10000000
-  function upsValidDistance(distance) {
-    return distance >= 800000 && distance <= 3200000
-  }
-  function isLatLonValid(lat, lon) {
-    lat = parseFloat(lat)
-    lon = parseFloat(lon)
-    return lat > -90 && lat < 90 && lon > -180 && lon < 180
-  }
-  function testUtmUpsValidity(
-    easting,
-    northing,
-    zoneNumber,
-    hemisphere,
-    setErrorMessage
-  ) {
-    zoneNumber = Number.parseInt(zoneNumber)
-    hemisphere = hemisphere.toUpperCase()
-    if (easting !== undefined) {
-      easting = letterRegex.test(easting) ? NaN : Number.parseFloat(easting)
-      if (Number.isNaN(easting)) {
-        setErrorMessage('Easting value is invalid')
-      }
-    }
-    if (northing !== undefined) {
-      northing = letterRegex.test(northing) ? NaN : Number.parseFloat(northing)
-      if (Number.isNaN(northing)) {
-        setErrorMessage('Northing value is invalid')
-      } else if (!Number.isNaN(easting)) {
-        const northernHemisphere = hemisphere === 'NORTHERN'
-        const isUps = zoneNumber === 0
-        const utmUpsParts = {
-          easting,
-          northing,
-          zoneNumber,
-          hemisphere,
-          northPole: northernHemisphere,
-        }
-        utmUpsParts.northing =
-          isUps || northernHemisphere ? northing : northing - northingOffset
-        if (
-          isUps &&
-          (!upsValidDistance(northing) || !upsValidDistance(easting))
-        ) {
-          setErrorMessage('Invalid UPS distance')
-        }
-        let { lat, lon } = converter.UTMUPStoLL(utmUpsParts)
-        lon = lon % 360
-        if (lon < -180) {
-          lon = lon + 360
-        }
-        if (lon > 180) {
-          lon = lon - 360
-        }
-        if (!isLatLonValid(lat, lon)) {
-          setErrorMessage('Invalid UTM/UPS coordinates')
-        } else {
-          setErrorMessage('')
-        }
-      }
-    }
-  }
-  function testValidity() {
-    testUtmUpsValidity(
-      utmUpsUpperLeftEasting,
-      utmUpsUpperLeftNorthing,
-      utmUpsUpperLeftZone,
-      utmUpsUpperLeftHemisphere,
-      setUpperLeftErrorMessage
-    )
-    testUtmUpsValidity(
-      utmUpsLowerRightEasting,
-      utmUpsLowerRightNorthing,
-      utmUpsLowerRightZone,
-      utmUpsLowerRightHemisphere,
-      setLowerRightErrorMessage
-    )
-  }
+  const [upperLeftError, setUpperLeftError] = useState({
+    error: false,
+    message: '',
+  })
+  const [lowerRightError, setLowerRightError] = useState({
+    error: false,
+    message: '',
+  })
   return (
     <div>
       <div className="input-location">
@@ -364,38 +256,79 @@ const BoundingBoxUtmUps = props => {
           <div>
             <TextField
               label="Easting"
-              value={utmUpsUpperLeftEasting}
+              value={
+                utmUpsUpperLeftEasting !== undefined
+                  ? String(utmUpsUpperLeftEasting)
+                  : utmUpsUpperLeftEasting
+              }
               onChange={value => setState('utmUpsUpperLeftEasting', value)}
-              onBlur={() => testValidity()}
+              onBlur={() =>
+                setUpperLeftError(
+                  validateGeo(
+                    'utm',
+                    utmUpsUpperLeftEasting,
+                    utmUpsUpperLeftNorthing,
+                    utmUpsUpperLeftZone,
+                    utmUpsUpperLeftHemisphere
+                  )
+                )
+              }
               addon="m"
             />
             <TextField
               label="Northing"
-              value={utmUpsUpperLeftNorthing}
-              onChange={value => ('utmUpsUpperLeftNorthing', value)}
-              onBlur={() => testValidity()}
+              value={
+                utmUpsUpperLeftNorthing !== undefined
+                  ? String(utmUpsUpperLeftNorthing)
+                  : utmUpsUpperLeftNorthing
+              }
+              onChange={value => setState('utmUpsUpperLeftNorthing', value)}
+              onBlur={() =>
+                setUpperLeftError(
+                  validateGeo(
+                    'utm',
+                    utmUpsUpperLeftEasting,
+                    utmUpsUpperLeftNorthing,
+                    utmUpsUpperLeftZone,
+                    utmUpsUpperLeftHemisphere
+                  )
+                )
+              }
               addon="m"
             />
             <Zone
               value={utmUpsUpperLeftZone}
               onChange={value => setState('utmUpsUpperLeftZone', value)}
-              onBlur={() => testValidity()}
+              onBlur={() =>
+                setUpperLeftError(
+                  validateGeo(
+                    'utm',
+                    utmUpsUpperLeftEasting,
+                    utmUpsUpperLeftNorthing,
+                    utmUpsUpperLeftZone,
+                    utmUpsUpperLeftHemisphere
+                  )
+                )
+              }
             />
             <Hemisphere
               value={utmUpsUpperLeftHemisphere}
               onChange={value => setState('utmUpsUpperLeftHemisphere', value)}
-              onBlur={() => testValidity()}
+              onBlur={() =>
+                setUpperLeftError(
+                  validateGeo(
+                    'utm',
+                    utmUpsUpperLeftEasting,
+                    utmUpsUpperLeftNorthing,
+                    utmUpsUpperLeftZone,
+                    utmUpsUpperLeftHemisphere
+                  )
+                )
+              }
             />
           </div>
         </Group>
-        {upperLeftErrorMessage ? null : null
-        /*{upperLeftErrorMessage ? (
-          <Invalid>
-            <WarningIcon className="fa fa-warning" />
-            <span>{ upperLeftErrorMessage }</span>
-          </Invalid>
-        ) : null}*/
-        }
+        {getErrorComponent(upperLeftError)}
       </div>
       <div className="input-location">
         <Group>
@@ -403,38 +336,79 @@ const BoundingBoxUtmUps = props => {
           <div>
             <TextField
               label="Easting"
-              value={utmUpsLowerRightEasting}
+              value={
+                utmUpsLowerRightEasting !== undefined
+                  ? String(utmUpsLowerRightEasting)
+                  : utmUpsLowerRightEasting
+              }
               onChange={value => setState('utmUpsLowerRightEasting', value)}
-              onBlur={() => testValidity()}
+              onBlur={() =>
+                setLowerRightError(
+                  validateGeo(
+                    'utm',
+                    utmUpsLowerRightEasting,
+                    utmUpsLowerRightNorthing,
+                    utmUpsLowerRightZone,
+                    utmUpsLowerRightHemisphere
+                  )
+                )
+              }
               addon="m"
             />
             <TextField
               label="Northing"
-              value={utmUpsLowerRightNorthing}
+              value={
+                utmUpsLowerRightNorthing !== undefined
+                  ? String(utmUpsLowerRightNorthing)
+                  : utmUpsLowerRightNorthing
+              }
               onChange={value => setState('utmUpsLowerRightNorthing', value)}
-              onBlur={() => testValidity()}
+              onBlur={() =>
+                setLowerRightError(
+                  validateGeo(
+                    'utm',
+                    utmUpsLowerRightEasting,
+                    utmUpsLowerRightNorthing,
+                    utmUpsLowerRightZone,
+                    utmUpsLowerRightHemisphere
+                  )
+                )
+              }
               addon="m"
             />
             <Zone
               value={utmUpsLowerRightZone}
               onChange={value => setState('utmUpsLowerRightZone', value)}
-              onBlur={() => testValidity()}
+              onBlur={() =>
+                setLowerRightError(
+                  validateGeo(
+                    'utm',
+                    utmUpsLowerRightEasting,
+                    utmUpsLowerRightNorthing,
+                    utmUpsLowerRightZone,
+                    utmUpsLowerRightHemisphere
+                  )
+                )
+              }
             />
             <Hemisphere
               value={utmUpsLowerRightHemisphere}
               onChange={value => setState('utmUpsLowerRightHemisphere', value)}
-              onBlur={() => testValidity()}
+              onBlur={() =>
+                setLowerRightError(
+                  validateGeo(
+                    'utm',
+                    utmUpsLowerRightEasting,
+                    utmUpsLowerRightNorthing,
+                    utmUpsLowerRightZone,
+                    utmUpsLowerRightHemisphere
+                  )
+                )
+              }
             />
           </div>
         </Group>
-        {lowerRightErrorMessage ? null : null
-        /*{lowerRightErrorMessage ? (
-          <Invalid>
-            <WarningIcon className="fa fa-warning" />
-            <span>{ lowerRightErrorMessage }</span>
-          </Invalid>
-        ) : null}*/
-        }
+        {getErrorComponent(lowerRightError)}
       </div>
     </div>
   )
