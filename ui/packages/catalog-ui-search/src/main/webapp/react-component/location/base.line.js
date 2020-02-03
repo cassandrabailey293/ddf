@@ -109,6 +109,10 @@ const BaseLine = props => {
     }
   } */
 
+  // useEffect(() => {
+  //   setCuurentValue(currentValue)
+  // })
+
   function validateListOfPoints(coordinates) {
     let message = ''
     const isLine = mode.includes('line')
@@ -140,7 +144,7 @@ const BaseLine = props => {
     return message
   }
 
-  function testValidity() {
+  function testValidity(currentValue) {
     if (!is2DArray(currentValue)) {
       return 'Not an acceptable value'
     }
@@ -171,7 +175,7 @@ const BaseLine = props => {
               // do nothing
             }
           }}
-          onBlur={() => setErrorMessage(testValidity())}
+          onBlur={() => setErrorMessage(testValidity(currentValue))}
         />
         {errorMessage ? (
           <Invalid>
