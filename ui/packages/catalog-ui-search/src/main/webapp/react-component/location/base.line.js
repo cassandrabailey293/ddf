@@ -13,7 +13,7 @@
  *
  **/
 import React, { useState, useEffect } from 'react'
-import { Invalid, WarningIcon } from '../utils/validation'
+import { getErrorComponent } from '../utils/validation'
 const { Units } = require('./common')
 const TextField = require('../text-field')
 
@@ -83,22 +83,22 @@ function validatePoint(point) {
      (Number.isNaN(Number.parseFloat(point[0])) &&
       Number.isNaN(Number.parseFloat(point[1])))
   ) {
-    return JSON.stringify(point) + ' is not a valid point.'
+    return { error: true, message: JSON.stringify(point) + ' is not a valid point.'}
   } else if (
     point[0] > 180 ||
     point[0] < -180 ||
     point[1] > 90 ||
     point[1] < -90
   ) {
-    return JSON.stringify(point) + ' is not a valid point.'
+    return { error: true, message: JSON.stringify(point) + ' is not a valid point.'}
   }
-  return ''
+  return { error: false, message: ''}
 }
 
 const BaseLine = props => {
   const { label, cursor, geometryKey, setState, unitKey, widthKey, mode  } = props
   const [currentValue, setCurrentValue] = useState(JSON.stringify(props[geometryKey]))
-  const [errorMessage, setErrorMessage] = useState()
+  const [error, setError] = useState({ error: false, message: ''})
 
   /*
   componentWillReceiveProps(props) {
@@ -109,9 +109,14 @@ const BaseLine = props => {
     }
   } */
 
+  // useEffect(() => {
+  //   setCurrentValue(currentValue)
+  // })
+
   useEffect(() => {
-    setCurrentValue(currentValue)
-  })
+    const { geometryKey } = props
+    setCurrentValue(JSON.stringify(props[geometryKey]))
+  }, [props.polygon, props.line])
 
   function validateListOfPoints(coordinates) {
     let message = ''
@@ -141,12 +146,15 @@ const BaseLine = props => {
         }
       }
     })
+    if (message.length > 0) {
+      return { error: true, message: message }
+    }
     return message
   }
 
-  function testValidity(currentValue) {
+  function testValidity() {
     if (!is2DArray(currentValue)) {
-      return 'Not an acceptable value'
+      return { error: true, message: 'Not an acceptable value' }
     }
     try {
       return validateListOfPoints(JSON.parse(currentValue))
@@ -156,7 +164,7 @@ const BaseLine = props => {
   }
 
   return (
-    <React.Fragment>
+    <div>
       <div className="input-location">
         <TextField
           label={label}
@@ -175,14 +183,9 @@ const BaseLine = props => {
               // do nothing
             }
           }}
-          onBlur={() => setErrorMessage(testValidity(currentValue))}
+          onBlur={() => setError(testValidity())}
         />
-        {errorMessage ? (
-          <Invalid>
-            <WarningIcon className="fa fa-warning" />
-            <span>{ errorMessage }</span>
-          </Invalid>
-        ) : null}
+        {getErrorComponent(error)}
         <Units value={props[unitKey]} onChange={cursor(unitKey)}>
           <TextField
             type="number"
@@ -192,7 +195,7 @@ const BaseLine = props => {
           />
         </Units>
       </div>
-    </React.Fragment>
+    </div>
   )
 }
 
