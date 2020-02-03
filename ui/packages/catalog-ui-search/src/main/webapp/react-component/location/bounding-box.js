@@ -27,12 +27,20 @@ const {
 } = require('../../component/location-new/geo-components/coordinates.js')
 const DirectionInput = require('../../component/location-new/geo-components/direction.js')
 const { Direction } = require('../../component/location-new/utils/dms-utils.js')
-import { locationInputValidators, getLocationInputError, getErrorComponent } from '../utils/validation'
+import {
+  locationInputValidators,
+  getLocationInputError,
+  getErrorComponent,
+} from '../utils/validation'
 
 const minimumDifference = 0.0001
 
-const BoundingBoxLatLon = props => {
-  const [latlonState, setLatLonState] = useState({ error: false, message: '', defaultValue: '' });
+const BoundingBoxLatLonDd = props => {
+  const [latlonState, setLatLonState] = useState({
+    error: false,
+    message: '',
+    defaultValue: '',
+  })
   const { north, east, south, west, setState } = props
 
   const { mapEast, mapWest, mapSouth, mapNorth } = props
@@ -43,22 +51,30 @@ const BoundingBoxLatLon = props => {
   const southMax = parseFloat(mapNorth) - minimumDifference
   function onChangeLatLon(key, value) {
     let { errorMsg, defaultCoord } = getLocationInputError(key, value)
-    setLatLonState({ error: !locationInputValidators[key](value), message: errorMsg, defaultValue: defaultCoord || ''})
-    if(defaultCoord && defaultCoord.length != 0) {
+    setLatLonState({
+      error: !locationInputValidators[key](value),
+      message: errorMsg,
+      defaultValue: defaultCoord || '',
+    })
+    if (defaultCoord && defaultCoord.length != 0) {
       value = defaultCoord
     }
     setState(key, value)
   }
   function onBlurLatLon(key, value) {
     let { errorMsg, defaultCoord } = getLocationInputError(key, value)
-    setLatLonState({ error: value !== undefined && value.length == 0, message: errorMsg, defaultValue: defaultCoord})
+    setLatLonState({
+      error: value !== undefined && value.length == 0,
+      message: errorMsg,
+      defaultValue: defaultCoord,
+    })
   }
   return (
     <div className="input-location">
       <TextField
         label="West"
         value={west}
-        onChange={(west) => onChangeLatLon('west', west)}
+        onChange={west => onChangeLatLon('west', west)}
         onBlur={() => onBlurLatLon('west', west)}
         type="number"
         step="any"
@@ -69,7 +85,7 @@ const BoundingBoxLatLon = props => {
       <TextField
         label="South"
         value={south}
-        onChange={(south) => onChangeLatLon('south', south)}
+        onChange={south => onChangeLatLon('south', south)}
         onBlur={() => onBlurLatLon('south', south)}
         type="number"
         step="any"
@@ -80,7 +96,7 @@ const BoundingBoxLatLon = props => {
       <TextField
         label="East"
         value={east}
-        onChange={(east) => onChangeLatLon('east', east)}
+        onChange={east => onChangeLatLon('east', east)}
         onBlur={() => onBlurLatLon('east', east)}
         type="number"
         step="any"
@@ -91,7 +107,7 @@ const BoundingBoxLatLon = props => {
       <TextField
         label="North"
         value={north}
-        onChange={(north) => onChangeLatLon('north', north)}
+        onChange={north => onChangeLatLon('north', north)}
         onBlur={() => onBlurLatLon('north', north)}
         type="number"
         step="any"
@@ -104,18 +120,122 @@ const BoundingBoxLatLon = props => {
   )
 }
 
+const BoundingBoxLatLonDms = props => {
+  const [latlonState, setLatLonState] = useState({
+    error: false,
+    errorMsg: '',
+    defaultValue: '',
+  })
+  const {
+    dmsSouth,
+    dmsNorth,
+    dmsWest,
+    dmsEast,
+
+    dmsSouthDirection,
+    dmsNorthDirection,
+    dmsWestDirection,
+    dmsEastDirection,
+
+    setState,
+  } = props
+
+  const latitudeDirections = [Direction.North, Direction.South]
+  const longitudeDirections = [Direction.East, Direction.West]
+
+  function onChangeLatLon(key, value, type) {
+    let { errorMsg, defaultCoord } = getLocationInputError(key, value)
+    setLatLonState({
+      error:
+        type == 'blur'
+          ? value !== undefined && value.length == 0
+          : !locationInputValidators[key](value),
+      message: errorMsg,
+      defaultValue: defaultCoord || '',
+    })
+    if (defaultCoord && defaultCoord.length != 0) {
+      value = defaultCoord
+    }
+    setState(key, value)
+  }
+  return (
+    <div className="input-location">
+      <DmsLongitude
+        label="West"
+        value={dmsWest}
+        onChange={(dmsWest, type) => onChangeLatLon('dmsWest', dmsWest, type)}
+      >
+        <DirectionInput
+          options={longitudeDirections}
+          value={dmsWestDirection}
+          onChange={dmsWestDirection =>
+            setState('dmsWestDirection', dmsWestDirection)
+          }
+        />
+      </DmsLongitude>
+      <DmsLatitude
+        label="South"
+        value={dmsSouth}
+        onChange={(dmsSouth, type) =>
+          onChangeLatLon('dmsSouth', dmsSouth, type)
+        }
+      >
+        <DirectionInput
+          options={latitudeDirections}
+          value={dmsSouthDirection}
+          onChange={dmsSouthDirection =>
+            setState('dmsSouthDirection', dmsSouthDirection)
+          }
+        />
+      </DmsLatitude>
+      <DmsLongitude
+        label="East"
+        value={dmsEast}
+        onChange={(dmsEast, type) => onChangeLatLon('dmsEast', dmsEast, type)}
+      >
+        <DirectionInput
+          options={longitudeDirections}
+          value={dmsEastDirection}
+          onChange={dmsEastDirection =>
+            setState('dmsEastDirection', dmsEastDirection)
+          }
+        />
+      </DmsLongitude>
+      <DmsLatitude
+        label="North"
+        value={dmsNorth}
+        onChange={(dmsNorth, type) =>
+          onChangeLatLon('dmsNorth', dmsNorth, type)
+        }
+      >
+        <DirectionInput
+          options={latitudeDirections}
+          value={dmsNorthDirection}
+          onChange={dmsNorthDirection =>
+            setState('dmsNorthDirection', dmsNorthDirection)
+          }
+        />
+      </DmsLatitude>
+      {getErrorComponent(latlonState)}
+    </div>
+  )
+}
+
 const usngs = require('usng.js')
 const converter = new usngs.Converter()
 
 const BoundingBoxUsngMgrs = props => {
-  const [error, setError] = useState({error: false, message: ''});
+  const [error, setError] = useState({ error: false, message: '' })
   const { usngbbUpperLeft, usngbbLowerRight, setState } = props
   function testValidity(usng) {
     try {
       const result = converter.USNGtoLL(usng, true)
-      setError({error: Number.isNaN(result.lat) || Number.isNaN(result.lon), message: 'Invalid USNG / MGRS coords'})
+      setError({
+        error: Number.isNaN(result.lat) || Number.isNaN(result.lon),
+        message: 'Invalid USNG / MGRS coords',
+      })
     } catch (err) {
-      setError({error: true, message: ''})
+      setError({ error: true, message: '' })
     }
   }
   return (
@@ -124,18 +244,21 @@ const BoundingBoxUsngMgrs = props => {
         label="Upper Left"
         style={{ minWidth: 200 }}
         value={usngbbUpperLeft}
-        onChange={(usngbbUpperLeft) => setState('usngbbUpperLeft', usngbbUpperLeft)}
+        onChange={usngbbUpperLeft =>
+          setState('usngbbUpperLeft', usngbbUpperLeft)
+        }
         onBlur={() => testValidity(usngbbUpperLeft)}
       />
       <TextField
         label="Lower Right"
         style={{ minWidth: 200 }}
         value={usngbbLowerRight}
-        onChange={(usngbbLowerRight) => setState('usngbbLowerRight', usngbbLowerRight)}
+        onChange={usngbbLowerRight =>
+          setState('usngbbLowerRight', usngbbLowerRight)
+        }
         onBlur={() => testValidity(usngbbLowerRight)}
       />
       {getErrorComponent(error)}
-
     </div>
   )
 }
@@ -152,8 +275,8 @@ const BoundingBoxUtmUps = props => {
     utmUpsLowerRightHemisphere,
     setState,
   } = props
-  const [upperLeftError, setUpperLeftError] = useState({ error: false, message: ''})
-  const [lowerRightError, setLowerRightError] = useState({ error: false, message: ''})
+  const [upperLeftErrorMessage, setUpperLeftErrorMessage] = useState()
+  const [lowerRightErrorMessage, setLowerRightErrorMessage] = useState()
   const letterRegex = /[a-z]/i
   const northingOffset = 10000000
   function upsValidDistance(distance) {
@@ -164,53 +287,74 @@ const BoundingBoxUtmUps = props => {
     lon = parseFloat(lon)
     return lat > -90 && lat < 90 && lon > -180 && lon < 180
   }
-  function testUtmUpsValidity(easting, northing, zoneNumber, hemisphere, setError) {
+  function testUtmUpsValidity(
+    easting,
+    northing,
+    zoneNumber,
+    hemisphere,
+    setErrorMessage
+  ) {
     zoneNumber = Number.parseInt(zoneNumber)
     hemisphere = hemisphere.toUpperCase()
-    if(easting !== undefined) {
+    if (easting !== undefined) {
       easting = letterRegex.test(easting) ? NaN : Number.parseFloat(easting)
-      if(Number.isNaN(easting)) {
-        setError({error: true, message: 'Easting value is invalid'})
+      if (Number.isNaN(easting)) {
+        setErrorMessage('Easting value is invalid')
       }
     }
-    if(northing !== undefined) {
+    if (northing !== undefined) {
       northing = letterRegex.test(northing) ? NaN : Number.parseFloat(northing)
-      if(Number.isNaN(northing)) {
-        setError({error: true, message: 'Northing value is invalid'})
-      }
-    }
-    if(northing !== undefined && easting !== undefined) {
-      const northernHemisphere = hemisphere === 'NORTHERN'
-      const isUps = zoneNumber === 0
-      const utmUpsParts = {
-        easting,
-        northing,
-        zoneNumber,
-        hemisphere,
-        northPole: northernHemisphere,
-      }
-      utmUpsParts.northing = isUps || northernHemisphere ? northing : northing - northingOffset
-      if (isUps && (!upsValidDistance(northing) || !upsValidDistance(easting))) {
-        setError({error: true, message: 'Invalid UPS distance'})
-      }
-      let { lat, lon } = converter.UTMUPStoLL(utmUpsParts)
-      lon = lon % 360
-      if (lon < -180) {
-        lon = lon + 360
-      }
-      if (lon > 180) {
-        lon = lon - 360
-      }
-      if(!isLatLonValid(lat, lon)) {
-        setError({ error: true, message: 'Invalid UTM/UPS coordinates'})
-      } else {
-        setError({ error: false, message: '' })
+      if (Number.isNaN(northing)) {
+        setErrorMessage('Northing value is invalid')
+      } else if (!Number.isNaN(easting)) {
+        const northernHemisphere = hemisphere === 'NORTHERN'
+        const isUps = zoneNumber === 0
+        const utmUpsParts = {
+          easting,
+          northing,
+          zoneNumber,
+          hemisphere,
+          northPole: northernHemisphere,
+        }
+        utmUpsParts.northing =
+          isUps || northernHemisphere ? northing : northing - northingOffset
+        if (
+          isUps &&
+          (!upsValidDistance(northing) || !upsValidDistance(easting))
+        ) {
+          setErrorMessage('Invalid UPS distance')
+        }
+        let { lat, lon } = converter.UTMUPStoLL(utmUpsParts)
+        lon = lon % 360
+        if (lon < -180) {
+          lon = lon + 360
+        }
+        if (lon > 180) {
+          lon = lon - 360
+        }
+        if (!isLatLonValid(lat, lon)) {
+          setErrorMessage('Invalid UTM/UPS coordinates')
+        } else {
+          setErrorMessage('')
+        }
       }
     }
   }
   function testValidity() {
-    testUtmUpsValidity(utmUpsUpperLeftEasting, utmUpsUpperLeftNorthing, utmUpsUpperLeftZone, utmUpsUpperLeftHemisphere, setUpperLeftError)
-    testUtmUpsValidity(utmUpsLowerRightEasting, utmUpsLowerRightNorthing, utmUpsLowerRightZone, utmUpsLowerRightHemisphere, setLowerRightError)
+    testUtmUpsValidity(
+      utmUpsUpperLeftEasting,
+      utmUpsUpperLeftNorthing,
+      utmUpsUpperLeftZone,
+      utmUpsUpperLeftHemisphere,
+      setUpperLeftErrorMessage
+    )
+    testUtmUpsValidity(
+      utmUpsLowerRightEasting,
+      utmUpsLowerRightNorthing,
+      utmUpsLowerRightZone,
+      utmUpsLowerRightHemisphere,
+      setLowerRightErrorMessage
+    )
   }
   return (
     <div>
@@ -228,7 +372,7 @@ const BoundingBoxUtmUps = props => {
             <TextField
               label="Northing"
               value={utmUpsUpperLeftNorthing}
-              onChange={value => setState('utmUpsUpperLeftNorthing', value)}
+              onChange={value => ('utmUpsUpperLeftNorthing', value)}
               onBlur={() => testValidity()}
               addon="m"
             />
@@ -244,7 +388,14 @@ const BoundingBoxUtmUps = props => {
             />
           </div>
         </Group>
-        {getErrorComponent(upperLeftError)}
+        {upperLeftErrorMessage ? null : null
+        /*{upperLeftErrorMessage ? (
+          <Invalid>
+            <WarningIcon className="fa fa-warning" />
+            <span>{ upperLeftErrorMessage }</span>
+          </Invalid>
+        ) : null}*/
+        }
       </div>
       <div className="input-location">
         <Group>
@@ -271,95 +422,40 @@ const BoundingBoxUtmUps = props => {
             />
             <Hemisphere
               value={utmUpsLowerRightHemisphere}
-              onChange={value => setState('utmUpsLowerRightHemisphere',value)}
+              onChange={value => setState('utmUpsLowerRightHemisphere', value)}
               onBlur={() => testValidity()}
             />
           </div>
         </Group>
-        {getErrorComponent(lowerRightError)}
+        {lowerRightErrorMessage ? null : null
+        /*{lowerRightErrorMessage ? (
+          <Invalid>
+            <WarningIcon className="fa fa-warning" />
+            <span>{ lowerRightErrorMessage }</span>
+          </Invalid>
+        ) : null}*/
+        }
       </div>
     </div>
   )
 }
 
-const BoundingBoxDms = props => {
-  const [latlonState, setLatLonState] = useState({ error: false, errorMsg: '', defaultValue: '' });
-  const {
-    dmsSouth,
-    dmsNorth,
-    dmsWest,
-    dmsEast,
-
-    dmsSouthDirection,
-    dmsNorthDirection,
-    dmsWestDirection,
-    dmsEastDirection,
-
-    setState,
-  } = props
-
-  const latitudeDirections = [Direction.North, Direction.South]
-  const longitudeDirections = [Direction.East, Direction.West]
-
-  function onChangeLatLon(key, value, type) {
-    let { errorMsg, defaultCoord } = getLocationInputError(key, value)
-    setLatLonState({ error: type == 'blur' ? (value !== undefined && value.length == 0) : !locationInputValidators[key](value), message: errorMsg, defaultValue: defaultCoord || ''})
-    if(defaultCoord && defaultCoord.length != 0) {
-      value = defaultCoord
-    }
-    setState(key, value)
-  }
-  return (
-    <div className="input-location">
-      <DmsLongitude label="West" value={dmsWest} onChange={(dmsWest, type) => onChangeLatLon('dmsWest', dmsWest, type)}>
-        <DirectionInput
-          options={longitudeDirections}
-          value={dmsWestDirection}
-          onChange={(dmsWestDirection) => setState('dmsWestDirection', dmsWestDirection)}
-        />
-      </DmsLongitude>
-      <DmsLatitude label="South" value={dmsSouth} onChange={(dmsSouth, type) => onChangeLatLon('dmsSouth', dmsSouth, type)}>
-        <DirectionInput
-          options={latitudeDirections}
-          value={dmsSouthDirection}
-          onChange={(dmsSouthDirection) => setState('dmsSouthDirection', dmsSouthDirection)}
-        />
-      </DmsLatitude>
-      <DmsLongitude label="East" value={dmsEast} onChange={(dmsEast, type) => onChangeLatLon('dmsEast', dmsEast, type)}>
-        <DirectionInput
-          options={longitudeDirections}
-          value={dmsEastDirection}
-          onChange={(dmsEastDirection) => setState('dmsEastDirection', dmsEastDirection)}
-        />
-      </DmsLongitude>
-      <DmsLatitude label="North" value={dmsNorth} onChange={(dmsNorth, type) => onChangeLatLon('dmsNorth', dmsNorth, type)}>
-        <DirectionInput
-          options={latitudeDirections}
-          value={dmsNorthDirection}
-          onChange={(dmsNorthDirection) => setState('dmsNorthDirection', dmsNorthDirection)}
-        />
-      </DmsLatitude>
-      {getErrorComponent(latlonState)}
-    </div>
-  )
-}
-
 const BoundingBox = props => {
-  const { setState, locationType } = props
+  const { cursor, locationType } = props
 
   const inputs = {
-    latlon: BoundingBoxLatLon,
+    dd: BoundingBoxLatLonDd,
+    dms: BoundingBoxLatLonDms,
     usng: BoundingBoxUsngMgrs,
     utmUps: BoundingBoxUtmUps,
-    dms: BoundingBoxDms,
   }
 
   const Component = inputs[locationType] || null
 
   return (
     <div>
-      <Radio value={locationType} onChange={(locationType) => setState('locationType', locationType)}>
-        <RadioItem value="latlon">Lat/Lon (DD)</RadioItem>
+      <Radio value={locationType} onChange={cursor('locationType')}>
+        <RadioItem value="dd">Lat/Lon (DD)</RadioItem>
         <RadioItem value="dms">Lat/Lon (DMS)</RadioItem>
         <RadioItem value="usng">USNG / MGRS</RadioItem>
         <RadioItem value="utmUps">UTM / UPS</RadioItem>

@@ -102,7 +102,7 @@ const BaseLine = props => {
     error: false,
     message: '',
   })
-  const [widthError, setWidthError] = useState({ error: false, message: ''})
+  const [bufferError, setBufferError] = useState({ error: false, message: ''})
 
   useEffect(() => {
     const { geometryKey } = props
@@ -154,11 +154,6 @@ const BaseLine = props => {
     }
   }
 
-  function onChangeWidth(widthKey, value) {
-    setWidthError(validateGeo(widthKey, value))
-    setState(widthKey, value)
-  }
-
   return (
     <div>
       <div className="input-location">
@@ -187,10 +182,15 @@ const BaseLine = props => {
             type="number"
             label="Buffer width"
             value={String(props[widthKey])}
-            onChange={(width) => onChangeWidth(widthKey, width)}
+            onChange={value => {
+              if(widthKey === 'lineWidth') {
+                setBufferError(validateGeo('lineWidth', value)) 
+              }
+              setState(widthKey, value)
+            }}
           />
         </Units>
-        {getErrorComponent(widthError)}
+        {getErrorComponent(bufferError)}
       </div>
     </div>
   )
