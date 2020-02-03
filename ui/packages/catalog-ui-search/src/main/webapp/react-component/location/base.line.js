@@ -96,7 +96,7 @@ function validatePoint(point) {
 }
 
 const BaseLine = props => {
-  const { label, cursor, geometryKey, setState, unitKey, widthKey, mode  } = props
+  const { label, geometryKey, setState, unitKey, widthKey, mode  } = props
   const [currentValue, setCurrentValue] = useState(JSON.stringify(props[geometryKey]))
   const [error, setError] = useState({ error: false, message: ''})
   const [widthError, setWidthError] = useState({ error: false, message: ''})
@@ -180,7 +180,7 @@ const BaseLine = props => {
           onBlur={() => setError(testValidity())}
         />
         {getErrorComponent(error)}
-        <Units value={props[unitKey]} onChange={cursor(unitKey)}>
+        <Units value={props[unitKey]} onChange={(value) => setState(unitKey, value)}>
           <TextField
             type="number"
             label="Buffer width"

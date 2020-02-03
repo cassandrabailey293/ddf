@@ -31,33 +31,6 @@ const BoundingBox = require('./bounding-box')
 const Keyword = require('./keyword')
 const plugin = require('plugins/location')
 
-const readableNames = {
-  lat: 'latitude',
-  lon: 'longitude',
-  west: 'longitude',
-  east: 'longitude',
-  north: 'latitude',
-  south: 'latitude',
-  dmsLat: 'latitude',
-  dmsLon: 'longitude',
-  dmsNorth: 'latitude',
-  dmsSouth: 'latitude',
-  dmsWest: 'longitude',
-  dmsEast: 'longitude',
-  lineWidth: 'buffer width',
-}
-
-const validLatLon = {
-  lat: '90',
-  lon: '180',
-  west: '180',
-  east: '180',
-  north: '90',
-  south: '90',
-  dmsLat: '90°00\'00"',
-  dmsLon: '180°00\'00"',
-}
-
 const inputs = plugin({
   line: {
     label: 'Line',
@@ -103,14 +76,6 @@ const DrawButton = ({ onDraw }) => (
     <span>Draw</span>
   </Button>
 )
-
-const Invalid = styled.div`
-  background-color: ${props => props.theme.negativeColor};
-  height: 100%;
-  display: block;
-  overflow: hidden;
-  color: white;
-`
 
 const Root = styled.div`
   height: ${props => (props.isOpen ? 'auto' : props.theme.minimumButtonSize)};
