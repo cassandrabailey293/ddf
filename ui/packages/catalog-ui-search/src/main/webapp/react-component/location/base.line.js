@@ -13,7 +13,7 @@
  *
  **/
 import React, { useState, useEffect } from 'react'
-import { getErrorComponent } from '../utils/validation'
+import { locationInputValidators, getLocationInputError, getErrorComponent } from '../utils/validation'
 const { Units } = require('./common')
 const TextField = require('../text-field')
 
@@ -99,19 +99,7 @@ const BaseLine = props => {
   const { label, cursor, geometryKey, setState, unitKey, widthKey, mode  } = props
   const [currentValue, setCurrentValue] = useState(JSON.stringify(props[geometryKey]))
   const [error, setError] = useState({ error: false, message: ''})
-
-  /*
-  componentWillReceiveProps(props) {
-    if (document.activeElement !== this.ref) {
-      const { geometryKey } = props
-      const value = JSON.stringify(props[geometryKey])
-      this.setState({ value })
-    }
-  } */
-
-  // useEffect(() => {
-  //   setCurrentValue(currentValue)
-  // })
+  const [widthError, setWidthError] = useState({ error: false, message: ''})
 
   useEffect(() => {
     const { geometryKey } = props
@@ -163,6 +151,12 @@ const BaseLine = props => {
     }
   }
 
+  function onChangeWidth(value) {
+    let { errorMsg } = getLocationInputError('lineWidth', value)
+    setWidthError({ error: !locationInputValidators['lineWidth'](value), message: errorMsg})
+    setState(widthKey, value)
+  }
+
   return (
     <div>
       <div className="input-location">
@@ -191,9 +185,10 @@ const BaseLine = props => {
             type="number"
             label="Buffer width"
             value={String(props[widthKey])}
-            onChange={cursor(widthKey)}
+            onChange={(width) => onChangeWidth(width)}
           />
         </Units>
+        {getErrorComponent(widthError)}
       </div>
     </div>
   )
