@@ -14,7 +14,7 @@
  **/
 
 const React = require('react')
- import { InvalidSearchFormMessage } from '../../../component/announcement/CommonMessages'
+import { InvalidSearchFormMessage } from '../../../component/announcement/CommonMessages'
 import styled from 'styled-components'
 const announcement = require('../../../component/announcement/index.jsx')
 const {
@@ -59,64 +59,105 @@ export function getFilterErrors(filters: any) {
   geometryErrors.forEach(function(err) {
     errors.add({
       title: 'Invalid geometry filter',
-      body: err
+      body: err,
     })
   })
   return Array.from(errors)
 }
 
-function getGeometryErrors(filter: any):Set<string> {
-    const geometry = filter.geojson && filter.geojson.geometry
-    const bufferWidth = filter.geojson.properties.buffer && filter.geojson.properties.buffer.width
-    const errors = new Set<string>()
-    if(!geometry) {
-      return errors
-    }
-    switch(filter.geojson.properties.type) {
-      case 'Polygon':
-        if(geometry.coordinates[0].length < 4) {
-          errors.add('Polygon coordinates must be in the form [[x,y],[x,y],[x,y],[x,y], ... ]')
-        }
-        break;
-      case 'LineString':
-        if(geometry.coordinates.length < 2) {
-          errors.add('Line coordinates must be in the form [[x,y],[x,y], ... ]')
-        }
-        if(!bufferWidth || bufferWidth == 0) {
-          errors.add('Line buffer width must be greater than 0.000001')
-        }
-        break;
-      case 'Point':
-        if(!bufferWidth || bufferWidth < 0.000001) {
-          errors.add('Radius must be greater than 0.000001')
-        }
-        if(geometry.coordinates.some((coord: any) => !coord || coord.toString().length == 0)) {
-          errors.add('Coordinates must not be empty')
-        }
-        break;
-      case 'BoundingBox':
-        const box = filter.geojson.properties
-        if(!box.east || !box.west || !box.north || !box.south) {
-          errors.add('Bounding Box must have valid values')
-        }
-        break;
-    }
+function getGeometryErrors(filter: any): Set<string> {
+  const geometry = filter.geojson && filter.geojson.geometry
+  const bufferWidth =
+    filter.geojson.properties.buffer && filter.geojson.properties.buffer.width
+  const errors = new Set<string>()
+  if (!geometry) {
     return errors
+  }
+  switch (filter.geojson.properties.type) {
+    case 'Polygon':
+      if (geometry.coordinates[0].length < 4) {
+        errors.add(
+          'Polygon coordinates must be in the form [[x,y],[x,y],[x,y],[x,y], ... ]'
+        )
+      }
+      break
+    case 'LineString':
+      if (geometry.coordinates.length < 2) {
+        errors.add('Line coordinates must be in the form [[x,y],[x,y], ... ]')
+      }
+      if (!bufferWidth || bufferWidth == 0) {
+        errors.add('Line buffer width must be greater than 0.000001')
+      }
+      break
+    case 'Point':
+      if (!bufferWidth || bufferWidth < 0.000001) {
+        errors.add('Radius must be greater than 0.000001')
+      }
+      if (
+        geometry.coordinates.some(
+          (coord: any) => !coord || coord.toString().length == 0
+        )
+      ) {
+        errors.add('Coordinates must not be empty')
+      }
+      break
+    case 'BoundingBox':
+      const box = filter.geojson.properties
+      if (!box.east || !box.west || !box.north || !box.south) {
+        errors.add('Bounding Box must have valid values')
+      }
+      break
+  }
+  return errors
 }
 
-export function getLocationInputError(key: string, value: string):{errorMsg:string, defaultCoord?:number} {
+const latValidator = (value: string) =>
+  Number(value) <= 90 && Number(value) >= -90
+const lonValidator = (value: string) =>
+  Number(value) <= 180 && Number(value) >= -180
+const dmsLatValidator = (value: string) =>
+  validateInput(value, 'dd°mm\'ss.s"') == value
+const dmsLonValidator = (value: string) =>
+  validateInput(value, 'ddd°mm\'ss.s"') == value
+
+export const locationInputValidators: {
+  [key: string]: (value: string) => boolean
+} = {
+  lat: latValidator,
+  lon: lonValidator,
+  west: lonValidator,
+  east: lonValidator,
+  north: latValidator,
+  south: latValidator,
+  dmsLat: dmsLatValidator,
+  dmsLon: dmsLonValidator,
+  dmsNorth: dmsLatValidator,
+  dmsSouth: dmsLatValidator,
+  dmsWest: dmsLonValidator,
+  dmsEast: dmsLonValidator,
+  radius: (value: string | number) => value >= 0.000001,
+  lineWidth: (value: string | number) => value >= 0.000001,
+}
+
+export function getLocationInputError(
+  key: string,
+  value: string
+): { errorMsg: string; defaultCoord?: number } {
   let errorMsg: string = ''
-  let defaultCoord;
-  if (value === undefined || key == 'polygonBufferWidth') {
+  let defaultCoord
+  if (value === undefined) {
     return { errorMsg, defaultCoord }
   }
   if (key === 'radius') {
     errorMsg = ' Radius cannot be empty or less than 0.00001.  '
   } else if (value !== undefined && value.length === 0) {
-    errorMsg = ' ' + readableNames[key].replace(/^\w/, c => c.toUpperCase()) + ' cannot be empty.  '
+    errorMsg =
+      ' ' +
+      readableNames[key].replace(/^\w/, c => c.toUpperCase()) +
+      ' cannot be empty.  '
   } else if (!locationInputValidators[key](value)) {
     defaultCoord = getValidLatLon(key, value)
-    errorMsg = 
+    errorMsg =
       value.replace(/_/g, '0') +
       ' is not an acceptable ' +
       readableNames[key] +
@@ -127,19 +168,7 @@ export function getLocationInputError(key: string, value: string):{errorMsg:stri
   return { errorMsg, defaultCoord }
 }
 
-/*
-**********
-Constants
-**********
-*/
-
-const latValidator = (value: string) => Number(value) <= 90 && Number(value) >= -90
-const lonValidator = (value: string) => Number(value) <= 180 && Number(value) >= -180
-const dmsLatValidator = (value: string) => validateInput(value, 'dd°mm\'ss.s"') == value
-const dmsLonValidator = (value: string) => validateInput(value, 'ddd°mm\'ss.s"') == value
-const widthValidator = (value: string | number) => value >= 0.000001 
-
-const readableNames: {[key: string]: string} = {
+const readableNames: { [key: string]: string } = {
   lat: 'latitude',
   lon: 'longitude',
   west: 'longitude',
@@ -153,10 +182,9 @@ const readableNames: {[key: string]: string} = {
   dmsWest: 'longitude',
   dmsEast: 'longitude',
   lineWidth: 'buffer width',
-  polygonBufferWidth: 'buffer width'
 }
 
-const validLatLon: {[key:string]: string} = {
+const validLatLon: { [key: string]: string } = {
   lat: '90',
   lon: '180',
   west: '180',
@@ -167,25 +195,7 @@ const validLatLon: {[key:string]: string} = {
   dmsLon: '180°00\'00"',
 }
 
-export const locationInputValidators: {[key: string]: (value: string) => boolean} = {
-  lat: latValidator,
-  lon: lonValidator,
-  west: lonValidator,
-  east: lonValidator,
-  north: latValidator,
-  south: latValidator,
-  dmsLat: dmsLatValidator,
-  dmsLon: dmsLonValidator,
-  dmsNorth: dmsLatValidator,
-  dmsSouth: dmsLatValidator,
-  dmsWest: dmsLonValidator,
-  dmsEast: dmsLonValidator,
-  radius: widthValidator,
-  lineWidth: widthValidator,
-  polygonBufferWidth: () => true
-}
-
-const getValidLatLon = (key:string, value:string) => {
+const getValidLatLon = (key: string, value: string) => {
   // TODO: change equals
   if (key == 'dmsLat' || key == 'dmsNorth' || key == 'dmsSouth') {
     return validateInput(value, 'dd°mm\'ss.s"')
@@ -201,9 +211,7 @@ const getValidLatLon = (key:string, value:string) => {
 }
 
 /*
-****************
 Error Components
-****************
 */
 
 const Invalid = styled.div`
@@ -225,4 +233,3 @@ export function getErrorComponent(errorState: ErrorState) {
     </Invalid>
   ) : null
 }
-

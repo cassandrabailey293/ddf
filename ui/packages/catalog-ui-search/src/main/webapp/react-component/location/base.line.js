@@ -13,7 +13,7 @@
  *
  **/
 import React, { useState, useEffect } from 'react'
-import { locationInputValidators, getLocationInputError, getErrorComponent } from '../utils/validation'
+import { getErrorComponent } from '../utils/validation'
 const { Units } = require('./common')
 const TextField = require('../text-field')
 
@@ -98,7 +98,10 @@ function validatePoint(point) {
 const BaseLine = props => {
   const { label, geometryKey, setState, unitKey, widthKey, mode  } = props
   const [currentValue, setCurrentValue] = useState(JSON.stringify(props[geometryKey]))
-  const [error, setError] = useState({ error: false, message: ''})
+  const [baseLineError, setBaseLineError] = useState({
+    error: false,
+    message: '',
+  })
   const [widthError, setWidthError] = useState({ error: false, message: ''})
 
   useEffect(() => {
@@ -137,7 +140,7 @@ const BaseLine = props => {
     if (message.length > 0) {
       return { error: true, message: message }
     }
-    return message
+    return { error: false, message }
   }
 
   function testValidity() {
@@ -177,9 +180,9 @@ const BaseLine = props => {
               // do nothing
             }
           }}
-          onBlur={() => setError(testValidity())}
+          onBlur={() => setBaseLineError(testValidity())}
         />
-        {getErrorComponent(error)}
+        {getErrorComponent(baseLineError)}
         <Units value={props[unitKey]} onChange={(value) => setState(unitKey, value)}>
           <TextField
             type="number"
