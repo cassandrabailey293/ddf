@@ -269,7 +269,7 @@ describe('CQL Utils', () => {
       )
     })
 
-    it('generates filter with anyGeo property and BBOX type (bb)', () => {
+    it('generates filter with anyGeo property and BBOX type (dd)', () => {
       const filter = CQLUtils.generateFilter(
         'some type',
         'anyGeo',
