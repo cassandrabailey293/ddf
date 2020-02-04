@@ -49,18 +49,19 @@ const BoundingBoxLatLonDd = props => {
   const eastMin = parseFloat(mapWest) + minimumDifference
   const northMin = parseFloat(mapSouth) + minimumDifference
   const southMax = parseFloat(mapNorth) - minimumDifference
+  function onChangeDd(key, value) {
+    const { error, message, defaultValue } = validateGeo(key, value)
+    setDdError({ error, message, defaultValue })
+    defaultValue
+      ? setState(key, defaultValue)
+      : setState(key, value)
+  }
   return (
     <div className="input-location">
       <TextField
         label="West"
         value={west !== undefined ? String(west) : west}
-        onChange={value => {
-          const { error, message, defaultValue } = validateGeo('west', value)
-          setDdError({ error, message, defaultValue })
-          defaultValue
-            ? setState('west', defaultValue)
-            : setState('west', value)
-        }}
+        onChange={value => onChangeDd('west', value)}
         onBlur={() => setDdError(validateGeo('west', west))}
         type="number"
         step="any"
@@ -71,13 +72,7 @@ const BoundingBoxLatLonDd = props => {
       <TextField
         label="South"
         value={south !== undefined ? String(south) : south}
-        onChange={value => {
-          const { error, message, defaultValue } = validateGeo('south', value)
-          setDdError({ error, message, defaultValue })
-          defaultValue
-            ? setState('south', defaultValue)
-            : setState('south', value)
-        }}
+        onChange={value => onChangeDd('south', value)}
         onBlur={() => setDdError(validateGeo('south', south))}
         type="number"
         step="any"
@@ -88,13 +83,7 @@ const BoundingBoxLatLonDd = props => {
       <TextField
         label="East"
         value={east !== undefined ? String(east) : east}
-        onChange={value => {
-          const { error, message, defaultValue } = validateGeo('east', value)
-          setDdError({ error, message, defaultValue })
-          defaultValue
-            ? setState('east', defaultValue)
-            : setState('east', value)
-        }}
+        onChange={value => onChangeDd('east', value)}
         onBlur={() => setDdError(validateGeo('east', east))}
         type="number"
         step="any"
@@ -105,12 +94,7 @@ const BoundingBoxLatLonDd = props => {
       <TextField
         label="North"
         value={north !== undefined ? String(north) : north}
-        onChange={value => {
-          setDdError(validateGeo('north', value))
-          ddError.defaultValue
-            ? setState('north', ddError.defaultValue)
-            : setState('north', value)
-        }}
+        onChange={value => onChangeDd('north', value)}
         onBlur={() => setDdError(validateGeo('north', north))}
         type="number"
         step="any"
