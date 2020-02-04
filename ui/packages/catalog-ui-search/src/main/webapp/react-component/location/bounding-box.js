@@ -51,7 +51,7 @@ const BoundingBoxLatLonDd = props => {
   const southMax = parseFloat(mapNorth) - minimumDifference
   function onChangeDd(key, value) {
     const { error, message, defaultValue } = validateGeo(key, value)
-    setDdError({ error, message, defaultValue })
+    if (defaultValue) { setDdError({ error, message, defaultValue }) }
     defaultValue
       ? setState(key, defaultValue)
       : setState(key, value)
@@ -129,13 +129,19 @@ const BoundingBoxLatLonDms = props => {
 
   function validate(key, type, value) {
     const { error, message, defaultValue } = validateGeo(key, value)
+    if (type === 'blur') {
+      setDmsError({
+        error: value !== undefined && value.length === 0,
+        message,
+        defaultValue,
+      })
+    } else if (defaultValue) {
     setDmsError({
-      error:
-        type === 'blur' ? value !== undefined && value.length === 0 : error,
+      error,
       message,
       defaultValue,
-    })
-    error
+    }) }
+    defaultValue
       ? setState(key, defaultValue)
       : setState(key, value)
   }

@@ -144,8 +144,6 @@ export function validateGeo(
     case 'radius':
     case 'lineWidth':
       return validateRadiusLineBuffer(key, value)
-    case 'polygonBufferWidth':
-      return { error: Number(value) === NaN, message: 'Invalid buffer value'}
     default:
   }
 }
@@ -247,7 +245,7 @@ function validateUtmUps(
         isUps || northernHemisphere ? northing : northing - northingOffset
       if (
         isUps &&
-        (!upsValidDistance(northing) || !upsValidDistance(northing))
+        (!upsValidDistance(northing) || !upsValidDistance(easting))
       ) {
         error = { error: true, message: 'Invalid UPS distance' }
       }

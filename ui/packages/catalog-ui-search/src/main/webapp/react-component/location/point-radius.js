@@ -40,7 +40,7 @@ const PointRadiusLatLonDd = props => {
         value={lat !== undefined ? String(lat) : lat}
         onChange={value => {
           const { error, message, defaultValue } = validateGeo('lat', value)
-          setDdError({ error, message, defaultValue })
+          if (defaultValue) { setDdError({ error, message, defaultValue }) }
           defaultValue
             ? setState('lat', defaultValue)
             : setState('lat', value)
@@ -57,7 +57,7 @@ const PointRadiusLatLonDd = props => {
         value={lon !== undefined ? String(lon) : lon}
         onChange={value => {
           const { error, message, defaultValue } = validateGeo('lon', value)
-          setDdError({ error, message, defaultValue })
+          if (defaultValue) { setDdError({ error, message, defaultValue }) }
           defaultValue
             ? setState('lon', defaultValue)
             : setState('lon', value)
@@ -107,13 +107,19 @@ const PointRadiusLatLonDms = props => {
 
   function validate(key, type, value) {
     const { error, message, defaultValue } = validateGeo(key, value)
+    if (type === 'blur') {
+      setDmsError({
+        error: value !== undefined && value.length === 0,
+        message,
+        defaultValue,
+      })
+    } else if (defaultValue) {
     setDmsError({
-      error:
-        type === 'blur' ? value !== undefined && value.length === 0 : error,
+      error,
       message,
       defaultValue,
-    })
-    error
+    }) }
+    defaultValue
       ? setState(key, defaultValue)
       : setState(key, value)
   }
