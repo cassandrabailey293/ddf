@@ -100,7 +100,7 @@ class Keyword extends React.Component {
     const suggester = this.props.suggester || (input => this.suggester(input))
     const {
       polygon,
-      cursor,
+      setState,
       polygonBufferWidth,
       polygonBufferUnits,
       polyType,
@@ -124,7 +124,7 @@ class Keyword extends React.Component {
         {!loading && polygon !== undefined && polyType === 'polygon' ? (
           <Polygon
             polygon={polygon}
-            cursor={cursor}
+            setState={setState}
             polygonBufferWidth={polygonBufferWidth}
             polygonBufferUnits={polygonBufferUnits}
           />
@@ -132,7 +132,7 @@ class Keyword extends React.Component {
         {!loading && polygon !== undefined && polyType === 'multipolygon' ? (
           <MultiPolygon
             polygon={polygon}
-            cursor={cursor}
+            setState={setState}
             polygonBufferWidth={polygonBufferWidth}
             polygonBufferUnits={polygonBufferUnits}
           />

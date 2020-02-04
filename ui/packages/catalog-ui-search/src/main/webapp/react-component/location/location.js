@@ -111,8 +111,5 @@ module.exports = ({ state, setState, options }) => (
     {...state}
     onDraw={options.onDraw}
     setState={setState}
-    cursor={key => value => {
-      setState(key, value, false)
-    }}
   />
 )
