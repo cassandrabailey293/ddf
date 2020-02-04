@@ -407,7 +407,7 @@ const BoundingBoxUtmUps = props => {
 }
 
 const BoundingBox = props => {
-  const { cursor, locationType } = props
+  const { setState, locationType } = props
 
   const inputs = {
     dd: BoundingBoxLatLonDd,
@@ -420,7 +420,7 @@ const BoundingBox = props => {
 
   return (
     <div>
-      <Radio value={locationType} onChange={cursor('locationType')}>
+      <Radio value={locationType} onChange={(value) => setState('locationType', value)}>
         <RadioItem value="dd">Lat/Lon (DD)</RadioItem>
         <RadioItem value="dms">Lat/Lon (DMS)</RadioItem>
         <RadioItem value="usng">USNG / MGRS</RadioItem>

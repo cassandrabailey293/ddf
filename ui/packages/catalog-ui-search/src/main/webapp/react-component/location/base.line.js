@@ -73,28 +73,22 @@ function is2DArray(coordinates) {
   }
 }
 
-function validatePoint(point) {
+function getPointErrorMessage(point) {
   if (
     point.length !== 2 ||
     (Number.isNaN(Number.parseFloat(point[0])) &&
       Number.isNaN(Number.parseFloat(point[1])))
   ) {
-    return {
-      error: true,
-      message: JSON.stringify(point) + ' is not a valid point.',
-    }
+    return JSON.stringify(point) + ' is not a valid point.'
   } else if (
     point[0] > 180 ||
     point[0] < -180 ||
     point[1] > 90 ||
     point[1] < -90
   ) {
-    return {
-      error: true,
-      message: JSON.stringify(point) + ' is not a valid point.',
-    }
+    return JSON.stringify(point) + ' is not a valid point.'
   }
-  return { error: false, message: '' }
+  return ''
 }
 
 const BaseLine = props => {
@@ -132,15 +126,13 @@ const BaseLine = props => {
     coordinates.forEach(coordinate => {
       if (coordinate.length > 2) {
         coordinate.forEach(coord => {
-          if (validatePoint(coord)) {
-            message = validatePoint(coord)
-          }
+          message = getPointErrorMessage(coord)
         })
       } else {
         if (mode.includes('multi')) {
           message = `Switch to ${isLine ? 'Line' : 'Polygon'}`
-        } else if (validatePoint(coordinate)) {
-          message = validatePoint(coordinate)
+        } else if (getPointErrorMessage(coordinate)) {
+          message = getPointErrorMessage(coordinate)
         }
       }
     })
