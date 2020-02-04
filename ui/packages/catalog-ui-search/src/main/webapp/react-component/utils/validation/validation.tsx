@@ -224,7 +224,6 @@ function validateUtmUps(
 ) {
   let error = { error: false, message: '' }
   zoneNumber = Number.parseInt(zoneNumber)
-  hemisphere = hemisphere.toUpperCase()
   // casting to Number() will return NaN if it's not a number, i.e. "3e".
   //Except for empty string, which is why we have to do this check below
   let easting = utmUpsEasting === '' ? NaN : Number(utmUpsEasting)
@@ -237,7 +236,7 @@ function validateUtmUps(
   if (!isNaN(northing)) {
     northing = Number.parseFloat(utmUpsEasting)
   }
-  const northernHemisphere = hemisphere === 'NORTHERN'
+  const northernHemisphere = hemisphere.toUpperCase() === 'NORTHERN'
   const isUps = zoneNumber === 0
   const utmUpsParts = {
     easting,

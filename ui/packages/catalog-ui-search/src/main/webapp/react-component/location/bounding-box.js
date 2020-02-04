@@ -54,8 +54,9 @@ const BoundingBoxLatLonDd = props => {
     if (defaultValue) {
       setDdError({ error, message, defaultValue })
       setState(key, defaultValue)
+    } else {
+      setState(key, value)
     }
-    setState(key, value)
   }
   return (
     <div className="input-location">
