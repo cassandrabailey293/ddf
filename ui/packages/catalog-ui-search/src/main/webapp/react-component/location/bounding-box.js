@@ -148,8 +148,8 @@ const BoundingBoxLatLonDms = props => {
       message,
       defaultValue,
     })
-    dmsError.defaultValue
-      ? setState(key, dmsError.defaultValue)
+    error
+      ? setState(key, defaultValue)
       : setState(key, value)
   }
 
