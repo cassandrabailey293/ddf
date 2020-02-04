@@ -56,16 +56,12 @@ function convertMultiWkt(isPolygon, value) {
     .map(shape => shape.match(coordinatePairRegex))
   shapes = shapes
     .filter(shape => shape !== null && shape.length >= numPoints)
-    .map(shape =>
-      shape.map(coordinatePair => coordinatePair.replace(' ', ','))
-    )
+    .map(shape => shape.map(coordinatePair => coordinatePair.replace(' ', ',')))
   return shapes.length === 0
     ? value
     : shapes.length === 1
       ? this.buildWktString(shapes[0])
-      : '[' +
-        shapes.map(shapeCoords => this.buildWktString(shapeCoords)) +
-        ']'
+      : '[' + shapes.map(shapeCoords => this.buildWktString(shapeCoords)) + ']'
 }
 
 function is2DArray(coordinates) {
@@ -80,34 +76,45 @@ function is2DArray(coordinates) {
 function validatePoint(point) {
   if (
     point.length !== 2 ||
-     (Number.isNaN(Number.parseFloat(point[0])) &&
+    (Number.isNaN(Number.parseFloat(point[0])) &&
       Number.isNaN(Number.parseFloat(point[1])))
   ) {
-    return { error: true, message: JSON.stringify(point) + ' is not a valid point.'}
+    return {
+      error: true,
+      message: JSON.stringify(point) + ' is not a valid point.',
+    }
   } else if (
     point[0] > 180 ||
     point[0] < -180 ||
     point[1] > 90 ||
     point[1] < -90
   ) {
-    return { error: true, message: JSON.stringify(point) + ' is not a valid point.'}
+    return {
+      error: true,
+      message: JSON.stringify(point) + ' is not a valid point.',
+    }
   }
-  return { error: false, message: ''}
+  return { error: false, message: '' }
 }
 
 const BaseLine = props => {
-  const { label, geometryKey, setState, unitKey, widthKey, mode  } = props
-  const [currentValue, setCurrentValue] = useState(JSON.stringify(props[geometryKey]))
+  const { label, geometryKey, setState, unitKey, widthKey, mode } = props
+  const [currentValue, setCurrentValue] = useState(
+    JSON.stringify(props[geometryKey])
+  )
   const [baseLineError, setBaseLineError] = useState({
     error: false,
     message: '',
   })
-  const [bufferError, setBufferError] = useState({ error: false, message: ''})
+  const [bufferError, setBufferError] = useState({ error: false, message: '' })
 
-  useEffect(() => {
-    const { geometryKey } = props
-    setCurrentValue(JSON.stringify(props[geometryKey]))
-  }, [props.polygon, props.line])
+  useEffect(
+    () => {
+      const { geometryKey } = props
+      setCurrentValue(JSON.stringify(props[geometryKey]))
+    },
+    [props.polygon, props.line]
+  )
 
   function validateListOfPoints(coordinates) {
     let message = ''
@@ -177,14 +184,17 @@ const BaseLine = props => {
           onBlur={() => setBaseLineError(testValidity())}
         />
         {getErrorComponent(baseLineError)}
-        <Units value={props[unitKey]} onChange={(value) => setState(unitKey, value)}>
+        <Units
+          value={props[unitKey]}
+          onChange={value => setState(unitKey, value)}
+        >
           <TextField
             type="number"
             label="Buffer width"
             value={String(props[widthKey])}
             onChange={value => {
-              if(widthKey === 'lineWidth') {
-                setBufferError(validateGeo('lineWidth', value)) 
+              if (widthKey === 'lineWidth') {
+                setBufferError(validateGeo('lineWidth', value))
               }
               setState(widthKey, value)
             }}

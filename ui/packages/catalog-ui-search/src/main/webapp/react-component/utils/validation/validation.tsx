@@ -22,6 +22,7 @@ const {
 } = require('../../../component/location-new/utils/dms-utils')
 const usngs = require('usng.js')
 const converter = new usngs.Converter()
+const northingOffset = 10000000
 
 interface ErrorState {
   error: boolean
@@ -65,6 +66,53 @@ export function getFilterErrors(filters: any) {
     })
   })
   return Array.from(errors)
+}
+
+export function validateGeo(
+  key: string,
+  value: string,
+  value1?: any,
+  value2?: any,
+  value3?: any
+) {
+  switch (key) {
+    case 'lat':
+    case 'north':
+    case 'south':
+      return validateDDLatLon('latitude', 90, value)
+    case 'lon':
+    case 'west':
+    case 'east':
+      return validateDDLatLon('longitude', 180, value)
+    case 'dmsLat':
+    case 'dmsNorth':
+    case 'dmsSouth':
+      return validateDmsLatLon('latitude', value)
+    case 'dmsLon':
+    case 'dmsEast':
+    case 'dmsWest':
+      return validateDmsLatLon('longitude', value)
+    case 'usng':
+      return validateUsng(value)
+    case 'utmUpsEasting':
+    case 'utmUpsNorthing':
+    case 'utmUpsZone':
+    case 'utmUpsHemisphere':
+      return validateUtmUps(key, value, value1, value2, value3)
+    case 'radius':
+    case 'lineWidth':
+      return validateRadiusLineBuffer(key, value)
+    default:
+  }
+}
+
+export function getErrorComponent(errorState: ErrorState) {
+  return errorState.error ? (
+    <Invalid>
+      <WarningIcon className="fa fa-warning" />
+      <span>{errorState.message}</span>
+    </Invalid>
+  ) : null
 }
 
 function getGeometryErrors(filter: any): Set<string> {
@@ -113,44 +161,6 @@ function getGeometryErrors(filter: any): Set<string> {
   return errors
 }
 
-export function validateGeo(
-  key: string,
-  value: string,
-  value1?: any,
-  value2?: any,
-  value3?: any
-) {
-  switch (key) {
-    case 'lat':
-    case 'north':
-    case 'south':
-      return validateDDLatLon('latitude', 90, value)
-    case 'lon':
-    case 'west':
-    case 'east':
-      return validateDDLatLon('longitude', 180, value)
-    case 'dmsLat':
-    case 'dmsNorth':
-    case 'dmsSouth':
-      return validateDmsLatLon('latitude', value)
-    case 'dmsLon':
-    case 'dmsEast':
-    case 'dmsWest':
-      return validateDmsLatLon('longitude', value)
-    case 'usng':
-      return validateUsng(value)
-    case 'utmUpsEasting':
-    case 'utmUpsNorthing':
-    case 'utmUpsZone':
-    case 'utmUpsHemisphere':
-      return validateUtmUps(key, value, value1, value2, value3)
-    case 'radius':
-    case 'lineWidth':
-      return validateRadiusLineBuffer(key, value)
-    default:
-  }
-}
-
 function validateDDLatLon(label: string, defaultCoord: number, value: string) {
   let message = ''
   let defaultValue
@@ -160,10 +170,7 @@ function validateDDLatLon(label: string, defaultCoord: number, value: string) {
   }
   if (Number(value) > defaultCoord || Number(value) < -1 * defaultCoord) {
     defaultValue = Number(value) > 0 ? defaultCoord : -1 * defaultCoord
-    message = `${value.replace(
-      /_/g,
-      '0'
-    )} is not an acceptable ${label} value. Defaulting to ${defaultValue}`
+    message = getDefaultingErrorMessage(value, label, defaultValue)
     return { error: true, message, defaultValue }
   }
   return { error: false, message, defaultValue }
@@ -179,10 +186,7 @@ function validateDmsLatLon(label: string, value: string) {
   }
   if (validateInput(value, validator) !== value) {
     defaultValue = validateInput(value, validator)
-    message = `${value.replace(
-      /_/g,
-      '0'
-    )} is not an acceptable ${label} value. Defaulting to ${defaultValue}`
+    message = getDefaultingErrorMessage(value, label, defaultValue)
     return { error: true, message, defaultValue }
   }
   return { error: false, message, defaultValue }
@@ -199,8 +203,6 @@ function validateUsng(value: string) {
     message: isInvalid ? 'Invalid USNG / MGRS coordinates' : '',
   }
 }
-
-const northingOffset = 10000000
 
 function upsValidDistance(distance: number) {
   return distance >= 800000 && distance <= 3200000
@@ -222,7 +224,7 @@ function validateUtmUps(
   let error = { error: false, message: '' }
   zoneNumber = Number.parseInt(zoneNumber)
   hemisphere = hemisphere.toUpperCase()
-  // casting to Number() will return NaN if it's not a number, i.e. "3e". 
+  // casting to Number() will return NaN if it's not a number, i.e. "3e".
   //Except for empty string, which is why we have to do this check below
   let eastingValidated = utmUpsEasting === '' ? NaN : Number(utmUpsEasting)
   let northingValidated = utmUpsNorthing === '' ? NaN : Number(utmUpsNorthing)
@@ -244,9 +246,13 @@ function validateUtmUps(
     northPole: northernHemisphere,
   }
   utmUpsParts.northing =
-    isUps || northernHemisphere ? northingValidated : northingValidated - northingOffset
-  const isNorthingInvalid = isNaN(utmUpsParts.northing) && utmUpsNorthing !== undefined
-  const isEastingInvalid = isNaN(utmUpsParts.easting) && utmUpsEasting !== undefined 
+    isUps || northernHemisphere
+      ? northingValidated
+      : northingValidated - northingOffset
+  const isNorthingInvalid =
+    isNaN(utmUpsParts.northing) && utmUpsNorthing !== undefined
+  const isEastingInvalid =
+    isNaN(utmUpsParts.easting) && utmUpsEasting !== undefined
   let { lat, lon } = converter.UTMUPStoLL(utmUpsParts)
   lon = lon % 360
   if (lon < -180) {
@@ -257,35 +263,53 @@ function validateUtmUps(
   }
   // we want to validate using the validate lat lon method, but only if they're both defined
   // if one or more is undefined, we want to return true
-  const isLatLonValid = validateLatLon(lat, lon) || (utmUpsNorthing === undefined || utmUpsEasting === undefined)
-  if ((isNorthingInvalid 
-  && isEastingInvalid) || !isLatLonValid) {
+  const isLatLonValid =
+    validateLatLon(lat, lon) ||
+    (utmUpsNorthing === undefined || utmUpsEasting === undefined)
+  if ((isNorthingInvalid && isEastingInvalid) || !isLatLonValid) {
     error = { error: true, message: 'Invalid UTM/UPS coordinates' }
-  } 
-  else if (key === 'utmUpsNorthing' && isNaN(utmUpsParts.northing) && utmUpsNorthing !== undefined) {
+  } else if (
+    key === 'utmUpsNorthing' &&
+    isNaN(utmUpsParts.northing) &&
+    utmUpsNorthing !== undefined
+  ) {
     error = { error: true, message: 'Northing value is invalid' }
-  } else if (key === 'utmUpsEasting' && isNaN(utmUpsParts.easting) && utmUpsEasting !== undefined) {
+  } else if (
+    key === 'utmUpsEasting' &&
+    isNaN(utmUpsParts.easting) &&
+    utmUpsEasting !== undefined
+  ) {
     error = { error: true, message: 'Easting value is invalid' }
   } else if (
     isUps &&
-    (!upsValidDistance(northingValidated) || !upsValidDistance(eastingValidated))
+    (!upsValidDistance(northingValidated) ||
+      !upsValidDistance(eastingValidated))
   ) {
     error = { error: true, message: 'Invalid UPS distance' }
-  } 
+  }
   return error
 }
 
 function validateRadiusLineBuffer(key: string, value: string) {
-  const label = key === 'lineWidth' || 'polygonBufferWidth' ? 'buffer' : 'radius'
+  const label = key === 'lineWidth' ? 'Buffer' : 'Radius'
   if ((value !== undefined && value.length === 0) || Number(value) < 0.000001) {
     return {
       error: true,
-      message: `${label.replace(/^\w/, c =>
-        c.toUpperCase()
-      )} cannot be less than 0.000001`,
+      message: label + 'cannot be less than 0.000001',
     }
   }
   return { error: false, message: '' }
+}
+
+function getDefaultingErrorMessage(
+  value: string,
+  label: string,
+  defaultValue: number
+) {
+  return `${value.replace(
+    /_/g,
+    '0'
+  )} is not an acceptable ${label} value. Defaulting to ${defaultValue}`
 }
 
 const Invalid = styled.div`
@@ -299,11 +323,3 @@ const Invalid = styled.div`
 const WarningIcon = styled.span`
   padding: ${({ theme }) => theme.minimumSpacing};
 `
-export function getErrorComponent(errorState: ErrorState) {
-  return errorState.error ? (
-    <Invalid>
-      <WarningIcon className="fa fa-warning" />
-      <span>{errorState.message}</span>
-    </Invalid>
-  ) : null
-}

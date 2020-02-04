@@ -51,10 +51,10 @@ const BoundingBoxLatLonDd = props => {
   const southMax = parseFloat(mapNorth) - minimumDifference
   function onChangeDd(key, value) {
     const { error, message, defaultValue } = validateGeo(key, value)
-    if (defaultValue) { setDdError({ error, message, defaultValue }) }
-    defaultValue
-      ? setState(key, defaultValue)
-      : setState(key, value)
+    if (defaultValue) {
+      setDdError({ error, message, defaultValue })
+    }
+    defaultValue ? setState(key, defaultValue) : setState(key, value)
   }
   return (
     <div className="input-location">
@@ -136,14 +136,13 @@ const BoundingBoxLatLonDms = props => {
         defaultValue,
       })
     } else if (defaultValue) {
-    setDmsError({
-      error,
-      message,
-      defaultValue,
-    }) }
-    defaultValue
-      ? setState(key, defaultValue)
-      : setState(key, value)
+      setDmsError({
+        error,
+        message,
+        defaultValue,
+      })
+    }
+    defaultValue ? setState(key, defaultValue) : setState(key, value)
   }
 
   return (

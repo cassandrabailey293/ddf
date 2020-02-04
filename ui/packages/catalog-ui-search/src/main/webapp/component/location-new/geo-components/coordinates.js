@@ -56,7 +56,7 @@ const DmsLatitude = props => {
       mask={latitudeDMSMask}
       placeholderChar="_"
       {...props}
-      onBlur={(event) => { 
+      onBlur={event => {
         props.onChange(pad(props.value), event.type)
       }}
     />
@@ -70,7 +70,7 @@ const DmsLongitude = props => {
       mask={longitudeDMSMask}
       placeholderChar="_"
       {...props}
-      onBlur={(event) => {
+      onBlur={event => {
         props.onChange(pad(props.value), event.type)
       }}
     />
@@ -115,7 +115,7 @@ const UsngCoordinate = props => {
 
 const pad = (coordinate = '') => {
   const matches = dmsRegex.exec(coordinate)
-  if(!matches) {
+  if (!matches) {
     return coordinate
   }
   let deg = matches[1]

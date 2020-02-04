@@ -20,9 +20,6 @@ const Button = require('../button')
 const Dropdown = require('../dropdown')
 const { Menu, MenuItem } = require('../menu')
 import styled from 'styled-components'
-const {
-  validateInput,
-} = require('../../component/location-new/utils/dms-utils')
 
 const Line = require('./line')
 const Polygon = require('./polygon')
@@ -90,7 +87,7 @@ const LocationInput = props => {
     <Root isOpen={input.label !== undefined}>
       <Component>
         <Dropdown label={input.label || 'Select Location Option'}>
-          <Menu value={mode} onChange={(mode) => setState('mode', mode)}>
+          <Menu value={mode} onChange={mode => setState('mode', mode)}>
             {Object.keys(inputs).map(key => (
               <MenuItem key={key} value={key}>
                 {inputs[key].label}
@@ -115,7 +112,7 @@ module.exports = ({ state, setState, options }) => (
     onDraw={options.onDraw}
     setState={setState}
     cursor={key => value => {
-        setState(key, value, false)
-      }}
+      setState(key, value, false)
+    }}
   />
 )
