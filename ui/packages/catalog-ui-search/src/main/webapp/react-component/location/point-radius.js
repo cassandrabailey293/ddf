@@ -223,7 +223,7 @@ const PointRadiusUtmUps = props => {
         onBlur={() =>
           setUtmError(
             validateGeo(
-              'utm',
+              'utmUpsEasting',
               utmUpsEasting,
               utmUpsNorthing,
               utmUpsZone,
@@ -242,7 +242,7 @@ const PointRadiusUtmUps = props => {
         onBlur={() =>
           setUtmError(
             validateGeo(
-              'utm',
+              'utmUpsNorthing',
               utmUpsEasting,
               utmUpsNorthing,
               utmUpsZone,
@@ -258,7 +258,7 @@ const PointRadiusUtmUps = props => {
         onBlur={() =>
           setUtmError(
             validateGeo(
-              'utm',
+              'utmUpsZone',
               utmUpsEasting,
               utmUpsNorthing,
               utmUpsZone,
@@ -273,7 +273,7 @@ const PointRadiusUtmUps = props => {
         onBlur={() =>
           setUtmError(
             validateGeo(
-              'utm',
+              'utmUpsHemisphere',
               utmUpsEasting,
               utmUpsNorthing,
               utmUpsZone,

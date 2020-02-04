@@ -139,8 +139,11 @@ export function validateGeo(
       return validateDmsLatLon('longitude', value)
     case 'usng':
       return validateUsng(value)
-    case 'utm':
-      return validateUtmUps(value, value1, value2, value3)
+    case 'utmUpsEasting':
+    case 'utmUpsNorthing':
+    case 'utmUpsZone':
+    case 'utmUpsHemisphere':
+      return validateUtmUps(key, value, value1, value2, value3)
     case 'radius':
     case 'lineWidth':
       return validateRadiusLineBuffer(key, value)
@@ -197,71 +200,78 @@ function validateUsng(value: string) {
   }
 }
 
-const letterRegex = /[^0-9.]/i
 const northingOffset = 10000000
 
 function upsValidDistance(distance: number) {
   return distance >= 800000 && distance <= 3200000
 }
-function isLatLonValid(lat: string, lon: string) {
+
+function validateLatLon(lat: string, lon: string) {
   const latitude = parseFloat(lat)
   const longitude = parseFloat(lon)
   return latitude > -90 && latitude < 90 && longitude > -180 && longitude < 180
 }
 
 function validateUtmUps(
+  key: string,
   utmUpsEasting: string,
-  northing: any,
+  utmUpsNorthing: string,
   zoneNumber: any,
   hemisphere: any
 ) {
   let error = { error: false, message: '' }
   zoneNumber = Number.parseInt(zoneNumber)
   hemisphere = hemisphere.toUpperCase()
-  let easting = NaN
-  if (utmUpsEasting !== undefined) {
-    easting = letterRegex.test(utmUpsEasting)
-      ? NaN
-      : Number.parseFloat(utmUpsEasting)
-    if (Number.isNaN(easting)) {
-      error = { error: true, message: 'Easting value is invalid' }
-    }
+  // casting to Number() will return NaN if it's not a number, i.e. "3e". 
+  //Except for empty string, which is why we have to do this check below
+  let eastingValidated = utmUpsEasting === '' ? NaN : Number(utmUpsEasting)
+  let northingValidated = utmUpsNorthing === '' ? NaN : Number(utmUpsNorthing)
+  // isNaN will try to parse anything into a number
+  // have to check this because parseFloat will be able to parse things with letters, i.e. "12.3w"
+  if (!isNaN(eastingValidated)) {
+    eastingValidated = Number.parseFloat(utmUpsEasting)
   }
-  if (northing !== undefined) {
-    northing = letterRegex.test(northing) ? NaN : Number.parseFloat(northing)
-    if (Number.isNaN(northing)) {
-      error = { error: true, message: 'Northing value is invalid' }
-    } else if (!Number.isNaN(easting)) {
-      const northernHemisphere = hemisphere === 'NORTHERN'
-      const isUps = zoneNumber === 0
-      const utmUpsParts = {
-        easting,
-        northing,
-        zoneNumber,
-        hemisphere,
-        northPole: northernHemisphere,
-      }
-      utmUpsParts.northing =
-        isUps || northernHemisphere ? northing : northing - northingOffset
-      if (
-        isUps &&
-        (!upsValidDistance(northing) || !upsValidDistance(easting))
-      ) {
-        error = { error: true, message: 'Invalid UPS distance' }
-      }
-      let { lat, lon } = converter.UTMUPStoLL(utmUpsParts)
-      lon = lon % 360
-      if (lon < -180) {
-        lon = lon + 360
-      }
-      if (lon > 180) {
-        lon = lon - 360
-      }
-      if (!isLatLonValid(lat, lon)) {
-        error = { error: true, message: 'Invalid UTM/UPS coordinates' }
-      }
-    }
+  if (!isNaN(northingValidated)) {
+    northingValidated = Number.parseFloat(utmUpsEasting)
   }
+  const northernHemisphere = hemisphere === 'NORTHERN'
+  const isUps = zoneNumber === 0
+  const utmUpsParts = {
+    easting: eastingValidated,
+    northing: northingValidated,
+    zoneNumber,
+    hemisphere,
+    northPole: northernHemisphere,
+  }
+  utmUpsParts.northing =
+    isUps || northernHemisphere ? northingValidated : northingValidated - northingOffset
+  const isNorthingInvalid = isNaN(utmUpsParts.northing) && utmUpsNorthing !== undefined
+  const isEastingInvalid = isNaN(utmUpsParts.easting) && utmUpsEasting !== undefined 
+  let { lat, lon } = converter.UTMUPStoLL(utmUpsParts)
+  lon = lon % 360
+  if (lon < -180) {
+    lon = lon + 360
+  }
+  if (lon > 180) {
+    lon = lon - 360
+  }
+  // we want to validate using the validate lat lon method, but only if they're both defined
+  // if one or more is undefined, we want to return true
+  const isLatLonValid = validateLatLon(lat, lon) || (utmUpsNorthing === undefined || utmUpsEasting === undefined)
+  if ((isNorthingInvalid 
+  && isEastingInvalid) || !isLatLonValid) {
+    error = { error: true, message: 'Invalid UTM/UPS coordinates' }
+  } 
+  else if (key === 'utmUpsNorthing' && isNaN(utmUpsParts.northing) && utmUpsNorthing !== undefined) {
+    error = { error: true, message: 'Northing value is invalid' }
+  } else if (key === 'utmUpsEasting' && isNaN(utmUpsParts.easting) && utmUpsEasting !== undefined) {
+    error = { error: true, message: 'Easting value is invalid' }
+  } else if (
+    isUps &&
+    (!upsValidDistance(northingValidated) || !upsValidDistance(eastingValidated))
+  ) {
+    error = { error: true, message: 'Invalid UPS distance' }
+  } 
   return error
 }
 
