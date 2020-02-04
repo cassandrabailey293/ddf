@@ -39,9 +39,10 @@ const PointRadiusLatLonDd = props => {
         label="Latitude"
         value={lat !== undefined ? String(lat) : lat}
         onChange={value => {
-          setDdError(validateGeo('lat', value))
-          ddError.defaultValue
-            ? setState('lat', ddError.defaultValue)
+          const { error, message, defaultValue } = validateGeo('lat', value)
+          setDdError({ error, message, defaultValue })
+          defaultValue
+            ? setState('lat', defaultValue)
             : setState('lat', value)
         }}
         onFocus={() => {
@@ -55,9 +56,10 @@ const PointRadiusLatLonDd = props => {
         label="Longitude"
         value={lon !== undefined ? String(lon) : lon}
         onChange={value => {
-          setDdError(validateGeo('lon', value))
-          ddError.defaultValue
-            ? setState('lon', ddError.defaultValue)
+          const { error, message, defaultValue } = validateGeo('lon', value)
+          setDdError({ error, message, defaultValue })
+          defaultValue
+            ? setState('lon', defaultValue)
             : setState('lon', value)
         }}
         onBlur={() => setDdError(validateGeo('lon', lon))}

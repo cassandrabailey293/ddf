@@ -55,9 +55,10 @@ const BoundingBoxLatLonDd = props => {
         label="West"
         value={west !== undefined ? String(west) : west}
         onChange={value => {
-          setDdError(validateGeo('west', value))
-          ddError.defaultValue
-            ? setState('west', ddError.defaultValue)
+          const { error, message, defaultValue } = validateGeo('west', value)
+          setDdError({ error, message, defaultValue })
+          defaultValue
+            ? setState('west', defaultValue)
             : setState('west', value)
         }}
         onBlur={() => setDdError(validateGeo('west', west))}
@@ -71,9 +72,10 @@ const BoundingBoxLatLonDd = props => {
         label="South"
         value={south !== undefined ? String(south) : south}
         onChange={value => {
-          setDdError(validateGeo('south', value))
-          ddError.defaultValue
-            ? setState('south', ddError.defaultValue)
+          const { error, message, defaultValue } = validateGeo('south', value)
+          setDdError({ error, message, defaultValue })
+          defaultValue
+            ? setState('south', defaultValue)
             : setState('south', value)
         }}
         onBlur={() => setDdError(validateGeo('south', south))}
@@ -87,9 +89,10 @@ const BoundingBoxLatLonDd = props => {
         label="East"
         value={east !== undefined ? String(east) : east}
         onChange={value => {
-          setDdError(validateGeo('east', value))
-          ddError.defaultValue
-            ? setState('east', ddError.defaultValue)
+          const { error, message, defaultValue } = validateGeo('east', value)
+          setDdError({ error, message, defaultValue })
+          defaultValue
+            ? setState('east', defaultValue)
             : setState('east', value)
         }}
         onBlur={() => setDdError(validateGeo('east', east))}
