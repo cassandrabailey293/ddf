@@ -60,8 +60,8 @@ function convertMultiWkt(isPolygon, value) {
   return shapes.length === 0
     ? value
     : shapes.length === 1
-      ? this.buildWktString(shapes[0])
-      : '[' + shapes.map(shapeCoords => this.buildWktString(shapeCoords)) + ']'
+      ? buildWktString(shapes[0])
+      : '[' + shapes.map(shapeCoords => buildWktString(shapeCoords)) + ']'
 }
 
 function is2DArray(coordinates) {
