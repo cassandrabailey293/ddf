@@ -136,10 +136,7 @@ const BaseLine = props => {
         }
       }
     })
-    if (message.length > 0) {
-      return { error: true, message: message }
-    }
-    return { error: false, message }
+    return { error: message.length > 0, message }
   }
 
   function testValidity() {
