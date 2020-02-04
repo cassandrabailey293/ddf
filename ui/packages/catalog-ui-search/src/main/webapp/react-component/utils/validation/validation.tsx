@@ -78,20 +78,12 @@ export function validateGeo(
 ) {
   switch (key) {
     case 'lat':
-    case 'north':
-    case 'south':
       return validateDDLatLon(latitude, 90, value)
     case 'lon':
-    case 'west':
-    case 'east':
       return validateDDLatLon(longitude, 180, value)
     case 'dmsLat':
-    case 'dmsNorth':
-    case 'dmsSouth':
       return validateDmsLatLon(latitude, value)
     case 'dmsLon':
-    case 'dmsEast':
-    case 'dmsWest':
       return validateDmsLatLon(longitude, value)
     case 'usng':
       return validateUsng(value)
@@ -114,6 +106,54 @@ export function getErrorComponent(errorState: ErrorState) {
       <span>{errorState.message}</span>
     </Invalid>
   ) : null
+}
+
+export function validateListOfPoints(coordinates: any[], mode: string) {
+  let message = ''
+  const isLine = mode.includes('line')
+  const numPoints = isLine ? 2 : 4
+  if (
+    !mode.includes('multi') &&
+    !coordinates.some(coords => coords.length > 2) &&
+    coordinates.length < numPoints
+  ) {
+    message = `Minimum of ${numPoints} points needed for ${
+      isLine ? 'Line' : 'Polygon'
+    }`
+  }
+  coordinates.forEach(coordinate => {
+    if (coordinate.length > 2) {
+      coordinate.forEach((coord: any) => {
+        if (hasPointError(coord))
+        message = JSON.stringify(coord) + ' is not a valid point.'
+      })
+    } else {
+      if (mode.includes('multi')) {
+        message = `Switch to ${isLine ? 'Line' : 'Polygon'}`
+      } else if (hasPointError(coordinate)) {
+        message = JSON.stringify(coordinate) + ' is not a valid point.'
+      }
+    }
+  })
+  return { error: message.length > 0, message }
+}
+
+function hasPointError(point: any[]) {
+  if (
+    point.length !== 2 ||
+    (Number.isNaN(Number.parseFloat(point[0])) &&
+      Number.isNaN(Number.parseFloat(point[1])))
+  ) {
+    return true
+  } else if (
+    point[0] > 180 ||
+    point[0] < -180 ||
+    point[1] > 90 ||
+    point[1] < -90
+  ) {
+    return true
+  }
+  return false
 }
 
 function getGeometryErrors(filter: any): Set<string> {

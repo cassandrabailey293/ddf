@@ -130,7 +130,8 @@ const BoundingBoxLatLonDms = props => {
   const longitudeDirections = [Direction.East, Direction.West]
 
   function validate(key, type, value) {
-    const { error, message, defaultValue } = validateGeo(key, value)
+    const label = key.contains('East') || key.contains('West') ? 'dmsLon' : 'dmsLat'
+    const { error, message, defaultValue } = validateGeo(label, value)
     if (type === 'blur') {
       setDmsError({
         error: value !== undefined && value.length === 0,

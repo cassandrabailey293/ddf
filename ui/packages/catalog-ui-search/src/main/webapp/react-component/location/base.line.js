@@ -13,7 +13,7 @@
  *
  **/
 import React, { useState, useEffect } from 'react'
-import { getErrorComponent, validateGeo } from '../utils/validation'
+import { getErrorComponent, validateGeo, validateListOfPoints } from '../utils/validation'
 const { Units } = require('./common')
 const TextField = require('../text-field')
 
@@ -73,24 +73,6 @@ function is2DArray(coordinates) {
   }
 }
 
-function hasPointError(point) {
-  if (
-    point.length !== 2 ||
-    (Number.isNaN(Number.parseFloat(point[0])) &&
-      Number.isNaN(Number.parseFloat(point[1])))
-  ) {
-    return true
-  } else if (
-    point[0] > 180 ||
-    point[0] < -180 ||
-    point[1] > 90 ||
-    point[1] < -90
-  ) {
-    return true
-  }
-  return false
-}
-
 const BaseLine = props => {
   const { label, geometryKey, setState, unitKey, widthKey, mode } = props
   const [currentValue, setCurrentValue] = useState(
@@ -110,42 +92,12 @@ const BaseLine = props => {
     [props.polygon, props.line]
   )
 
-  function validateListOfPoints(coordinates) {
-    let message = ''
-    const isLine = mode.includes('line')
-    const numPoints = isLine ? 2 : 4
-    if (
-      !mode.includes('multi') &&
-      !coordinates.some(coords => coords.length > 2) &&
-      coordinates.length < numPoints
-    ) {
-      message = `Minimum of ${numPoints} points needed for ${
-        isLine ? 'Line' : 'Polygon'
-      }`
-    }
-    coordinates.forEach(coordinate => {
-      if (coordinate.length > 2) {
-        coordinate.forEach(coord => {
-          if (hasPointError(coord))
-          message = JSON.stringify(coord) + ' is not a valid point.'
-        })
-      } else {
-        if (mode.includes('multi')) {
-          message = `Switch to ${isLine ? 'Line' : 'Polygon'}`
-        } else if (hasPointError(coordinate)) {
-          message = JSON.stringify(coordinate) + ' is not a valid point.'
-        }
-      }
-    })
-    return { error: message.length > 0, message }
-  }
-
   function testValidity() {
     if (!is2DArray(currentValue)) {
       return { error: true, message: 'Not an acceptable value' }
     }
     try {
-      return validateListOfPoints(JSON.parse(currentValue))
+      return validateListOfPoints(JSON.parse(currentValue), mode)
     } catch (e) {
       //do nothing
     }
