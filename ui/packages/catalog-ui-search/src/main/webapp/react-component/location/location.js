@@ -87,7 +87,7 @@ const LocationInput = props => {
     <Root isOpen={input.label !== undefined}>
       <Component>
         <Dropdown label={input.label || 'Select Location Option'}>
-          <Menu value={mode} onChange={mode => setState('mode', mode)}>
+          <Menu value={mode} onChange={value => setState('mode', value)}>
             {Object.keys(inputs).map(key => (
               <MenuItem key={key} value={key}>
                 {inputs[key].label}

@@ -13,7 +13,7 @@
  *
  **/
 import React, { useState } from 'react'
-import { validateGeo, getErrorComponent } from '../utils/validation'
+import { validateGeo, getErrorComponent, initialErrorState, initialErrorStateWithDefault } from '../utils/validation'
 const Group = require('../group')
 const Label = require('./label')
 const TextField = require('../text-field')
@@ -40,11 +40,7 @@ const BoundingBoxLatLonDd = props => {
     mapSouth,
     mapNorth,
   } = props
-  const [ddError, setDdError] = useState({
-    error: false,
-    message: '',
-    defaultValue: '',
-  })
+  const [ddError, setDdError] = useState(initialErrorStateWithDefault)
   const westMax = parseFloat(mapEast) - minimumDifference
   const eastMin = parseFloat(mapWest) + minimumDifference
   const northMin = parseFloat(mapSouth) + minimumDifference
@@ -121,11 +117,7 @@ const BoundingBoxLatLonDms = props => {
     dmsEastDirection,
     setState,
   } = props
-  const [dmsError, setDmsError] = useState({
-    error: false,
-    errorMsg: '',
-    defaultValue: '',
-  })
+  const [dmsError, setDmsError] = useState(initialErrorStateWithDefault)
   const latitudeDirections = [Direction.North, Direction.South]
   const longitudeDirections = [Direction.East, Direction.West]
 
@@ -201,7 +193,7 @@ const BoundingBoxLatLonDms = props => {
 
 const BoundingBoxUsngMgrs = props => {
   const { usngbbUpperLeft, usngbbLowerRight, setState } = props
-  const [usngError, setUsngError] = useState({ error: false, message: '' })
+  const [usngError, setUsngError] = useState(initialErrorState)
   return (
     <div className="input-location">
       <TextField
@@ -235,14 +227,8 @@ const BoundingBoxUtmUps = props => {
     utmUpsLowerRightHemisphere,
     setState,
   } = props
-  const [upperLeftError, setUpperLeftError] = useState({
-    error: false,
-    message: '',
-  })
-  const [lowerRightError, setLowerRightError] = useState({
-    error: false,
-    message: '',
-  })
+  const [upperLeftError, setUpperLeftError] = useState(initialErrorState)
+  const [lowerRightError, setLowerRightError] = useState(initialErrorState)
   return (
     <div>
       <div className="input-location">

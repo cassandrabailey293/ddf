@@ -138,6 +138,17 @@ export function validateListOfPoints(coordinates: any[], mode: string) {
   return { error: message.length > 0, message }
 }
 
+export const initialErrorState = {
+  error: false,
+  message: '',
+}
+
+export const initialErrorStateWithDefault = {
+  error: false,
+  message: '',
+  defaultValue: '',
+}
+
 function hasPointError(point: any[]) {
   if (
     point.length !== 2 ||

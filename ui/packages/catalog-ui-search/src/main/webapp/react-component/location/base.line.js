@@ -13,7 +13,7 @@
  *
  **/
 import React, { useState, useEffect } from 'react'
-import { getErrorComponent, validateGeo, validateListOfPoints } from '../utils/validation'
+import { getErrorComponent, validateGeo, validateListOfPoints, initialErrorState } from '../utils/validation'
 const { Units } = require('./common')
 const TextField = require('../text-field')
 
@@ -82,7 +82,7 @@ const BaseLine = props => {
     error: false,
     message: '',
   })
-  const [bufferError, setBufferError] = useState({ error: false, message: '' })
+  const [bufferError, setBufferError] = useState(initialErrorState)
 
   useEffect(
     () => {

@@ -15,7 +15,7 @@
 import React, { useState } from 'react'
 const { Radio, RadioItem } = require('../radio')
 const TextField = require('../text-field')
-import { getErrorComponent, validateGeo } from '../utils/validation'
+import { getErrorComponent, validateGeo, initialErrorState, initialErrorStateWithDefault } from '../utils/validation'
 const { Units, Zone, Hemisphere, MinimumSpacing } = require('./common')
 const {
   DmsLatitude,
@@ -26,11 +26,7 @@ const { Direction } = require('../../component/location-new/utils/dms-utils.js')
 
 const PointRadiusLatLonDd = props => {
   const { lat, lon, radius, radiusUnits, setState } = props
-  const [ddError, setDdError] = useState({
-    error: false,
-    message: '',
-    defaultValue: '',
-  })
+  const [ddError, setDdError] = useState(initialErrorStateWithDefault)
   function onChangeDd(key, value) {
     const { error, message, defaultValue } = validateGeo(key, value)
     if (defaultValue) {
@@ -40,7 +36,7 @@ const PointRadiusLatLonDd = props => {
       setState(key, value)
     }
   }
-  const [radiusError, setRadiusError] = useState({ error: false, message: '' })
+  const [radiusError, setRadiusError] = useState(initialErrorState)
   return (
     <div>
       <TextField
@@ -66,7 +62,6 @@ const PointRadiusLatLonDd = props => {
       >
         <TextField
           type="number"
-          min="0"
           label="Radius"
           value={String(radius)}
           onChange={value => {
@@ -90,12 +85,8 @@ const PointRadiusLatLonDms = props => {
     radiusUnits,
     setState,
   } = props
-  const [dmsError, setDmsError] = useState({
-    error: false,
-    message: '',
-    defaultValue: '',
-  })
-  const [radiusError, setRadiusError] = useState({ error: false, message: '' })
+  const [dmsError, setDmsError] = useState(initialErrorStateWithDefault)
+  const [radiusError, setRadiusError] = useState(initialErrorState)
   const latitudeDirections = [Direction.North, Direction.South]
   const longitudeDirections = [Direction.East, Direction.West]
 
@@ -163,8 +154,8 @@ const PointRadiusLatLonDms = props => {
 
 const PointRadiusUsngMgrs = props => {
   const { usng, radius, radiusUnits, setState } = props
-  const [usngError, setUsngError] = useState({ error: false, message: '' })
-  const [radiusError, setRadiusError] = useState({ error: false, message: '' })
+  const [usngError, setUsngError] = useState(initialErrorState)
+  const [radiusError, setRadiusError] = useState(initialErrorState)
   return (
     <div>
       <TextField
@@ -202,8 +193,8 @@ const PointRadiusUtmUps = props => {
     radiusUnits,
     setState,
   } = props
-  const [utmError, setUtmError] = useState({ error: false, message: '' })
-  const [radiusError, setRadiusError] = useState({ error: false, message: '' })
+  const [utmError, setUtmError] = useState(initialErrorState)
+  const [radiusError, setRadiusError] = useState(initialErrorState)
 
   return (
     <div>

@@ -17,5 +17,7 @@ export {
   getFilterErrors,
   getErrorComponent,
   validateGeo,
-  validateListOfPoints
+  validateListOfPoints,
+  initialErrorState,
+  initialErrorStateWithDefault,
 } from './validation'
