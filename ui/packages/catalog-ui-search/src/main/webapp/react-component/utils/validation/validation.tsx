@@ -23,7 +23,8 @@ const {
 const usngs = require('usng.js')
 const converter = new usngs.Converter()
 const northingOffset = 10000000
-
+const latitude = 'latitude'
+const longitude = 'longitude'
 interface ErrorState {
   error: boolean
   message: string
@@ -79,19 +80,19 @@ export function validateGeo(
     case 'lat':
     case 'north':
     case 'south':
-      return validateDDLatLon('latitude', 90, value)
+      return validateDDLatLon(latitude, 90, value)
     case 'lon':
     case 'west':
     case 'east':
-      return validateDDLatLon('longitude', 180, value)
+      return validateDDLatLon(longitude, 180, value)
     case 'dmsLat':
     case 'dmsNorth':
     case 'dmsSouth':
-      return validateDmsLatLon('latitude', value)
+      return validateDmsLatLon(latitude, value)
     case 'dmsLon':
     case 'dmsEast':
     case 'dmsWest':
-      return validateDmsLatLon('longitude', value)
+      return validateDmsLatLon(longitude, value)
     case 'usng':
       return validateUsng(value)
     case 'utmUpsEasting':
@@ -154,7 +155,7 @@ function getGeometryErrors(filter: any): Set<string> {
     case 'BoundingBox':
       const box = filter.geojson.properties
       if (!box.east || !box.west || !box.north || !box.south) {
-        errors.add('Bounding Box must have valid values')
+        errors.add('Bounding box must have valid values')
       }
       break
   }
@@ -165,7 +166,7 @@ function validateDDLatLon(label: string, defaultCoord: number, value: string) {
   let message = ''
   let defaultValue
   if (value !== undefined && value.length === 0) {
-    message = `${label.replace(/^\w/, c => c.toUpperCase())} cannot be empty`
+    message = getEmptyErrorMessage(label)
     return { error: true, message, defaultValue }
   }
   if (Number(value) > defaultCoord || Number(value) < -1 * defaultCoord) {
@@ -179,9 +180,9 @@ function validateDDLatLon(label: string, defaultCoord: number, value: string) {
 function validateDmsLatLon(label: string, value: string) {
   let message = ''
   let defaultValue
-  const validator = label === 'latitude' ? 'dd°mm\'ss.s"' : 'ddd°mm\'ss.s"'
+  const validator = label === latitude ? 'dd°mm\'ss.s"' : 'ddd°mm\'ss.s"'
   if (value !== undefined && value.length === 0) {
-    message = `${label.replace(/^\w/, c => c.toUpperCase())} cannot be empty`
+    message = getEmptyErrorMessage(label)
     return { error: true, message, defaultValue }
   }
   if (validateInput(value, validator) !== value) {
@@ -226,29 +227,29 @@ function validateUtmUps(
   hemisphere = hemisphere.toUpperCase()
   // casting to Number() will return NaN if it's not a number, i.e. "3e".
   //Except for empty string, which is why we have to do this check below
-  let eastingValidated = utmUpsEasting === '' ? NaN : Number(utmUpsEasting)
-  let northingValidated = utmUpsNorthing === '' ? NaN : Number(utmUpsNorthing)
+  let easting = utmUpsEasting === '' ? NaN : Number(utmUpsEasting)
+  let northing = utmUpsNorthing === '' ? NaN : Number(utmUpsNorthing)
   // isNaN will try to parse anything into a number
   // have to check this because parseFloat will be able to parse things with letters, i.e. "12.3w"
-  if (!isNaN(eastingValidated)) {
-    eastingValidated = Number.parseFloat(utmUpsEasting)
+  if (!isNaN(easting)) {
+    easting = Number.parseFloat(utmUpsEasting)
   }
-  if (!isNaN(northingValidated)) {
-    northingValidated = Number.parseFloat(utmUpsEasting)
+  if (!isNaN(northing)) {
+    northing = Number.parseFloat(utmUpsEasting)
   }
   const northernHemisphere = hemisphere === 'NORTHERN'
   const isUps = zoneNumber === 0
   const utmUpsParts = {
-    easting: eastingValidated,
-    northing: northingValidated,
+    easting,
+    northing,
     zoneNumber,
     hemisphere,
     northPole: northernHemisphere,
   }
   utmUpsParts.northing =
     isUps || northernHemisphere
-      ? northingValidated
-      : northingValidated - northingOffset
+      ? northing
+      : northing - northingOffset
   const isNorthingInvalid =
     isNaN(utmUpsParts.northing) && utmUpsNorthing !== undefined
   const isEastingInvalid =
@@ -282,8 +283,8 @@ function validateUtmUps(
     error = { error: true, message: 'Easting value is invalid' }
   } else if (
     isUps &&
-    (!upsValidDistance(northingValidated) ||
-      !upsValidDistance(eastingValidated))
+    (!upsValidDistance(northing) ||
+      !upsValidDistance(easting))
   ) {
     error = { error: true, message: 'Invalid UPS distance' }
   }
@@ -291,7 +292,7 @@ function validateUtmUps(
 }
 
 function validateRadiusLineBuffer(key: string, value: string) {
-  const label = key === 'lineWidth' ? 'Buffer' : 'Radius'
+  const label = key === 'lineWidth' ? 'Buffer ' : 'Radius '
   if ((value !== undefined && value.length === 0) || Number(value) < 0.000001) {
     return {
       error: true,
@@ -310,6 +311,10 @@ function getDefaultingErrorMessage(
     /_/g,
     '0'
   )} is not an acceptable ${label} value. Defaulting to ${defaultValue}`
+}
+
+function getEmptyErrorMessage(label: string) {
+  return `${label.replace(/^\w/, c => c.toUpperCase())} cannot be empty`
 }
 
 const Invalid = styled.div`

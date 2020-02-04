@@ -31,6 +31,15 @@ const PointRadiusLatLonDd = props => {
     message: '',
     defaultValue: '',
   })
+  function onChangeDd(key, value) {
+    const { error, message, defaultValue } = validateGeo(key, value)
+    if (defaultValue) {
+      setDdError({ error, message, defaultValue })
+      setState(key, defaultValue)
+    } else {
+      setState(key, value)
+    }
+  }
   const [radiusError, setRadiusError] = useState({ error: false, message: '' })
   return (
     <div>
@@ -38,16 +47,7 @@ const PointRadiusLatLonDd = props => {
         type="number"
         label="Latitude"
         value={lat !== undefined ? String(lat) : lat}
-        onChange={value => {
-          const { error, message, defaultValue } = validateGeo('lat', value)
-          if (defaultValue) {
-            setDdError({ error, message, defaultValue })
-          }
-          defaultValue ? setState('lat', defaultValue) : setState('lat', value)
-        }}
-        onFocus={() => {
-          setDdError({ error: false, message: '', defaultValue: '' })
-        }}
+        onChange={value => onChangeDd('lat', value)}
         onBlur={() => setDdError(validateGeo('lat', lat))}
         addon="°"
       />
@@ -55,13 +55,7 @@ const PointRadiusLatLonDd = props => {
         type="number"
         label="Longitude"
         value={lon !== undefined ? String(lon) : lon}
-        onChange={value => {
-          const { error, message, defaultValue } = validateGeo('lon', value)
-          if (defaultValue) {
-            setDdError({ error, message, defaultValue })
-          }
-          defaultValue ? setState('lon', defaultValue) : setState('lon', value)
-        }}
+        onChange={value => onChangeDd('lon', value)}
         onBlur={() => setDdError(validateGeo('lon', lon))}
         addon="°"
       />
@@ -199,7 +193,7 @@ const PointRadiusUsngMgrs = props => {
 }
 
 const PointRadiusUtmUps = props => {
-  let {
+  const {
     utmUpsEasting,
     utmUpsNorthing,
     utmUpsZone,

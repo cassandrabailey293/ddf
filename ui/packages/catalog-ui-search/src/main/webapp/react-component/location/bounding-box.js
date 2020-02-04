@@ -53,8 +53,9 @@ const BoundingBoxLatLonDd = props => {
     const { error, message, defaultValue } = validateGeo(key, value)
     if (defaultValue) {
       setDdError({ error, message, defaultValue })
+      setState(key, defaultValue)
     }
-    defaultValue ? setState(key, defaultValue) : setState(key, value)
+    setState(key, value)
   }
   return (
     <div className="input-location">
@@ -62,7 +63,7 @@ const BoundingBoxLatLonDd = props => {
         label="West"
         value={west !== undefined ? String(west) : west}
         onChange={value => onChangeDd('west', value)}
-        onBlur={() => setDdError(validateGeo('west', west))}
+        onBlur={() => setDdError(validateGeo('lon', west))}
         type="number"
         step="any"
         min={-180}
@@ -73,7 +74,7 @@ const BoundingBoxLatLonDd = props => {
         label="South"
         value={south !== undefined ? String(south) : south}
         onChange={value => onChangeDd('south', value)}
-        onBlur={() => setDdError(validateGeo('south', south))}
+        onBlur={() => setDdError(validateGeo('lat', south))}
         type="number"
         step="any"
         min={-90}
@@ -84,7 +85,7 @@ const BoundingBoxLatLonDd = props => {
         label="East"
         value={east !== undefined ? String(east) : east}
         onChange={value => onChangeDd('east', value)}
-        onBlur={() => setDdError(validateGeo('east', east))}
+        onBlur={() => setDdError(validateGeo('lon', east))}
         type="number"
         step="any"
         min={eastMin || -180}
@@ -95,7 +96,7 @@ const BoundingBoxLatLonDd = props => {
         label="North"
         value={north !== undefined ? String(north) : north}
         onChange={value => onChangeDd('north', value)}
-        onBlur={() => setDdError(validateGeo('north', north))}
+        onBlur={() => setDdError(validateGeo('lat', north))}
         type="number"
         step="any"
         min={northMin || -90}
