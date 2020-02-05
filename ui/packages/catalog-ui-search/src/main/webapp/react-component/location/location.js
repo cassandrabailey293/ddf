@@ -55,6 +55,7 @@ const inputs = plugin({
           setState={({ value, ...data }) => {
             setState({ keywordValue: value, ...data })
           }}
+          setBufferState={(key, value) => setState(key, value)}
         />
       )
     },

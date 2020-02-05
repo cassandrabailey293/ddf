@@ -79,7 +79,7 @@ function is2DArray(coordinates) {
 }
 
 const BaseLine = props => {
-  const { label, geometryKey, setState, unitKey, widthKey, mode } = props
+  const { label, geometryKey, setState, setBufferState, unitKey, widthKey, mode } = props
   const [currentValue, setCurrentValue] = useState(
     JSON.stringify(props[geometryKey])
   )
@@ -130,7 +130,10 @@ const BaseLine = props => {
         {getErrorComponent(baseLineError)}
         <Units
           value={props[unitKey]}
-          onChange={value => setState(unitKey, value)}
+          onChange={value => {
+            setState(unitKey, value)
+            typeof setBufferState === 'function' ? setBufferState(unitKey, value) : setState(unitKey, value)
+          }}
         >
           <TextField
             type="number"
@@ -140,7 +143,7 @@ const BaseLine = props => {
               if (widthKey === 'lineWidth') {
                 setBufferError(validateGeo('lineWidth', value))
               }
-              setState(widthKey, value)
+              typeof setBufferState === 'function' ? setBufferState(widthKey, value) : setState(widthKey, value)
             }}
           />
         </Units>
