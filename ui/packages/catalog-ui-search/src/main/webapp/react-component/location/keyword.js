@@ -129,6 +129,7 @@ class Keyword extends React.Component {
             polygonBufferWidth={polygonBufferWidth}
             polygonBufferUnits={polygonBufferUnits}
             setBufferState={setBufferState}
+            polyType={polyType}
           />
         ) : null}
         {!loading && polygon !== undefined && polyType === 'multipolygon' ? (
@@ -138,6 +139,7 @@ class Keyword extends React.Component {
             polygonBufferWidth={polygonBufferWidth}
             polygonBufferUnits={polygonBufferUnits}
             setBufferState={setBufferState}
+            polyType={polyType}
           />
         ) : null}
       </div>

@@ -79,7 +79,7 @@ function is2DArray(coordinates) {
 }
 
 const BaseLine = props => {
-  const { label, geometryKey, setState, setBufferState, unitKey, widthKey, mode } = props
+  const { label, geometryKey, setState, setBufferState, unitKey, widthKey, mode, polyType } = props
   const [currentValue, setCurrentValue] = useState(
     JSON.stringify(props[geometryKey])
   )
@@ -99,9 +99,10 @@ const BaseLine = props => {
       return { error: true, message: 'Not an acceptable value' }
     }
     try {
-      return validateListOfPoints(JSON.parse(currentValue), mode)
+      const pointsValid = validateListOfPoints(JSON.parse(currentValue), mode || polyType) 
+      return pointsValid === undefined ? initialErrorState : pointsValid
     } catch (e) {
-      //do nothing
+      return initialErrorState
     }
   }
 
