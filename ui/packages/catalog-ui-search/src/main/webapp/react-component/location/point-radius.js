@@ -15,7 +15,12 @@
 import React, { useState } from 'react'
 const { Radio, RadioItem } = require('../radio')
 const TextField = require('../text-field')
-import { getErrorComponent, validateGeo, initialErrorState, initialErrorStateWithDefault } from '../utils/validation'
+import {
+  getErrorComponent,
+  validateGeo,
+  initialErrorState,
+  initialErrorStateWithDefault,
+} from '../utils/validation'
 const { Units, Zone, Hemisphere, MinimumSpacing } = require('./common')
 const {
   DmsLatitude,

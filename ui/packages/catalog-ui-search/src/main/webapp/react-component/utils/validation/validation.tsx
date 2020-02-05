@@ -125,7 +125,7 @@ export function validateListOfPoints(coordinates: any[], mode: string) {
     if (coordinate.length > 2) {
       coordinate.forEach((coord: any) => {
         if (hasPointError(coord))
-        message = JSON.stringify(coord) + ' is not a valid point.'
+          message = JSON.stringify(coord) + ' is not a valid point.'
       })
     } else {
       if (mode.includes('multi')) {
@@ -297,9 +297,7 @@ function validateUtmUps(
     northPole: northernHemisphere,
   }
   utmUpsParts.northing =
-    isUps || northernHemisphere
-      ? northing
-      : northing - northingOffset
+    isUps || northernHemisphere ? northing : northing - northingOffset
   const isNorthingInvalid =
     isNaN(utmUpsParts.northing) && utmUpsNorthing !== undefined
   const isEastingInvalid =
@@ -333,8 +331,7 @@ function validateUtmUps(
     error = { error: true, message: 'Easting value is invalid' }
   } else if (
     isUps &&
-    (!upsValidDistance(northing) ||
-      !upsValidDistance(easting))
+    (!upsValidDistance(northing) || !upsValidDistance(easting))
   ) {
     error = { error: true, message: 'Invalid UPS distance' }
   }

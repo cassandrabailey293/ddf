@@ -13,7 +13,12 @@
  *
  **/
 import React, { useState } from 'react'
-import { validateGeo, getErrorComponent, initialErrorState, initialErrorStateWithDefault } from '../utils/validation'
+import {
+  validateGeo,
+  getErrorComponent,
+  initialErrorState,
+  initialErrorStateWithDefault,
+} from '../utils/validation'
 const Group = require('../group')
 const Label = require('./label')
 const TextField = require('../text-field')
@@ -122,7 +127,8 @@ const BoundingBoxLatLonDms = props => {
   const longitudeDirections = [Direction.East, Direction.West]
 
   function validate(key, type, value) {
-    const label = key.includes('East') || key.includes('West') ? 'dmsLon' : 'dmsLat'
+    const label =
+      key.includes('East') || key.includes('West') ? 'dmsLon' : 'dmsLat'
     const { error, message, defaultValue } = validateGeo(label, value)
     if (type === 'blur') {
       setDmsError({
@@ -409,7 +415,10 @@ const BoundingBox = props => {
 
   return (
     <div>
-      <Radio value={locationType} onChange={(value) => setState('locationType', value)}>
+      <Radio
+        value={locationType}
+        onChange={value => setState('locationType', value)}
+      >
         <RadioItem value="dd">Lat/Lon (DD)</RadioItem>
         <RadioItem value="dms">Lat/Lon (DMS)</RadioItem>
         <RadioItem value="usng">USNG / MGRS</RadioItem>

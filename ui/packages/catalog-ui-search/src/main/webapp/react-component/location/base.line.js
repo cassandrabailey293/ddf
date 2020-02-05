@@ -13,7 +13,12 @@
  *
  **/
 import React, { useState, useEffect } from 'react'
-import { getErrorComponent, validateGeo, validateListOfPoints, initialErrorState } from '../utils/validation'
+import {
+  getErrorComponent,
+  validateGeo,
+  validateListOfPoints,
+  initialErrorState,
+} from '../utils/validation'
 const { Units } = require('./common')
 const TextField = require('../text-field')
 
@@ -78,10 +83,7 @@ const BaseLine = props => {
   const [currentValue, setCurrentValue] = useState(
     JSON.stringify(props[geometryKey])
   )
-  const [baseLineError, setBaseLineError] = useState({
-    error: false,
-    message: '',
-  })
+  const [baseLineError, setBaseLineError] = useState(initialErrorState)
   const [bufferError, setBufferError] = useState(initialErrorState)
 
   useEffect(

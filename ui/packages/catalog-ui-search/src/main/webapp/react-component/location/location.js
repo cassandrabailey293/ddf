@@ -107,9 +107,5 @@ const LocationInput = props => {
 }
 
 module.exports = ({ state, setState, options }) => (
-  <LocationInput
-    {...state}
-    onDraw={options.onDraw}
-    setState={setState}
-  />
+  <LocationInput {...state} onDraw={options.onDraw} setState={setState} />
 )
