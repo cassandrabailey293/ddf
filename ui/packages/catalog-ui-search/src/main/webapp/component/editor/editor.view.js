@@ -54,7 +54,6 @@ const AddAttributeView = require('../dropdown/add-attribute/dropdown.add-attribu
 const RemoveAttributeView = require('../dropdown/remove-attribute/dropdown.remove-attribute.view.js')
 const AttributesRearrangeView = require('../dropdown/attributes-rearrange/dropdown.attributes-rearrange.view.js')
 const ShowAttributeView = require('../dropdown/show-attribute/dropdown.show-attribute.view.js')
-const HideAttributeView = require('../dropdown/hide-attribute/dropdown.hide-attribute.view.js')
 
 module.exports = Marionette.LayoutView.extend({
   setDefaultModel() {
@@ -75,7 +74,6 @@ module.exports = Marionette.LayoutView.extend({
     editorRemove: '> .editor-header > .is-removeAttribute',
     editorRearrange: '> .editor-header > .is-rearrangeAttribute',
     editorShow: '> .editor-header > .is-showAttribute',
-    editorHide: '> .editor-header > .is-hideAttribute'
   },
   attributesAdded: undefined,
   attributesRemoved: undefined,
@@ -175,15 +173,6 @@ module.exports = Marionette.LayoutView.extend({
     )
     this.editorShow.show(
       new ShowAttributeView({
-        model: new DropdownModel(),
-        selectionInterface: this.options.selectionInterface,
-      }),
-      {
-        replaceElement: true,
-      }
-    )
-    this.editorHide.show(
-      new HideAttributeView({
         model: new DropdownModel(),
         selectionInterface: this.options.selectionInterface,
       }),
