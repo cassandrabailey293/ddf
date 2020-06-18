@@ -93,8 +93,10 @@ public class EventApplication implements SparkApplication {
           synchronized (listeners) {
             listeners.forEach(
                 (listener) -> {
-                  listener.write("event: " + type + "\n");
-                  listener.write("data: " + "id=1234" + "\n\n");
+                  JSONObject data = new JSONObject();
+                  data.put("data", "id=1234");
+                  data.put("type", type);
+                  listener.write(data + "\n");
                   listener.flush();
                 });
           }
