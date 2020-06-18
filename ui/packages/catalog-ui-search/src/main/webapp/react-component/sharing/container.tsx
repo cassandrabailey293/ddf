@@ -112,6 +112,7 @@ const handleSave = (attributes: any, id: number) => {
       {
         ids: [id],
         attributes: attributes,
+        type: 'result',
       },
     ]),
   })
