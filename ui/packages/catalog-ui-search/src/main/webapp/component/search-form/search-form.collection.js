@@ -58,17 +58,7 @@ module.exports = Backbone.AssociatedModel.extend({
     searchForms: [],
   },
   initialize() {
-    if (promiseIsResolved === true) {
-      this.addAllForms()
-      promiseIsResolved = false
-      bootstrapPromise = new templatePromiseSupplier()
-    }
-    bootstrapPromise.then(() => {
-      this.addAllForms()
-      this.doneLoading()
-    })
-
-    const onMessage = () => {
+    const getForms = () => {
       if (promiseIsResolved === true) {
         this.addAllForms()
         promiseIsResolved = false
@@ -81,8 +71,10 @@ module.exports = Backbone.AssociatedModel.extend({
     }
 
     EventSourceUtil.createEventListener('searchform', {
-      onMessage: onMessage,
+      onMessage: getForms,
     })
+
+    getForms()
   },
   relations: [
     {
